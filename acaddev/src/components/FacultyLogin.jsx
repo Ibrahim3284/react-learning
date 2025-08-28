@@ -17,15 +17,23 @@ export default function FacultyLogin() {
     setLoading(true);
 
     try {
-      const isValidStudent = await fetch("http://localhost:8087/isStudent", {
+      // Step 1: Verify faculty
+      const isValidFaculty = await fetch("http://localhost:8087/isFaculty", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
-      })
-      if (!isValidStudent.ok) {
-        const errMsg = await response.text();
-        if(response.text === "false") throw new Error(errMsg || "Login failed");
+      });
+
+      if (isValidFaculty.ok) {
+        const responseVal = await isValidFaculty.json();
+        if (responseVal === false) {
+          throw new Error("You are not a faculty");
+        }
+      } else {
+        throw new Error("You are not a faculty");
       }
+
+      // Step 2: Login and get token
       const response = await fetch("http://localhost:8087/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -39,7 +47,9 @@ export default function FacultyLogin() {
 
       const tokenString = await response.text();
       localStorage.setItem("authToken", tokenString);
-      navigate("/adminPage");
+
+      // Redirect to faculty dashboard
+      navigate("/facultyPage");
     } catch (err) {
       console.error(err);
       setError(err.message || "Login failed");
@@ -54,7 +64,7 @@ export default function FacultyLogin() {
       <div className="min-h-screen flex items-center justify-center bg-gray-900 px-4">
         <div className="relative w-full max-w-md bg-gray-800 rounded-3xl shadow-2xl overflow-hidden border border-gray-700">
           {/* Decorative glow */}
-          <div className="absolute inset-0 bg-gradient-to-br from-red-600 via-purple-600 to-pink-500 opacity-10 blur-3xl -z-10"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-500 opacity-10 blur-3xl -z-10"></div>
 
           <div className="p-10">
             <h2 className="text-3xl font-extrabold text-center text-white mb-8">
@@ -72,7 +82,7 @@ export default function FacultyLogin() {
                   placeholder="Username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-5 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-white placeholder-gray-400 transition"
+                  className="w-full px-5 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400 transition"
                   required
                 />
               </div>
@@ -83,7 +93,7 @@ export default function FacultyLogin() {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-5 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-white placeholder-gray-400 transition"
+                  className="w-full px-5 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400 transition"
                   required
                 />
               </div>
@@ -91,7 +101,7 @@ export default function FacultyLogin() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-gradient-to-r from-pink-500 via-red-500 to-purple-500 text-white font-semibold rounded-xl shadow-lg hover:scale-105 transition-transform duration-300"
+                className="w-full py-3 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white font-semibold rounded-xl shadow-lg hover:scale-105 transition-transform duration-300"
               >
                 {loading ? "Logging in..." : "Login"}
               </button>
@@ -99,7 +109,7 @@ export default function FacultyLogin() {
 
             <div className="mt-6 text-center text-gray-400 text-sm">
               Forgot your password?{" "}
-              <span className="text-pink-400 underline cursor-pointer">
+              <span className="text-blue-400 underline cursor-pointer">
                 Reset here
               </span>
             </div>

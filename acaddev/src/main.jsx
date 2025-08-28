@@ -15,6 +15,15 @@ import StudentList from "./components/StudentList";
 import UpdateStudent from "./components/UpdateStudent";
 import EditStudent from "./components/EditStudent";
 import StudentPage from "./components/StudentPage"
+import FacultyList from "./components/FacultyList";
+import EditFaculty from "./components/EditFaculty";
+import AddFaculty from "./components/AddFaculty";
+import FacultyPage from "./components/FacultyPage";
+import Questions from "./components/Questions";
+import AddQuestion from "./components/AddQuestion";
+import AddTest from "./components/AddTest";
+import ListTests from "./components/ListTests";
+import TestDetails from "./components/TestDetails";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -33,6 +42,15 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <Route path="/UpdateStudent" element={<UpdateStudent />} />
       <Route path="/editStudent/:id" element={<EditStudent />} />
       <Route path="/StudentPage" element={<StudentPage />} />
+      <Route path="/FacultyList" element={<FacultyList />} />
+      <Route path="/editFaculty/:id" element={<EditFaculty />} />
+      <Route path="/addFaculty" element={<AddFaculty />} />
+      <Route path="/FacultyPage" element={<FacultyPage />} />
+      <Route path="/Questions" element={<Questions />} />
+      <Route path="/AddQuestion" element={<AddQuestion />} />
+      <Route path="/AddTest" element={<AddTest />} />
+      <Route path="/ListTests" element={<ListTests />} />
+      <Route path="/test/:id" element={<TestDetails />} />
     </Routes>
   </BrowserRouter>
 </React.StrictMode>

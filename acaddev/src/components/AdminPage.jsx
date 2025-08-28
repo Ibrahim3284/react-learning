@@ -37,10 +37,9 @@ export default function AdminPage() {
 
   const actions = [
     { name: "List Students", route: "/studentList", icon: "📋" },
-    { name: "List Faculties", endpoint: "faculties/list", icon: "👨‍🏫" },
+    { name: "List Faculties", route: "/facultyList", icon: "👨‍🏫" },
     { name: "Add Student", route: "/addStudent", icon: "➕" },
-    { name: "Add Faculty", endpoint: "faculties/add", icon: "🧑‍🏫" },
-    { name: "Edit Faculty", endpoint: "faculties/edit", icon: "✏️" },
+    { name: "Add Faculty", route: "/addFaculty", icon: "🧑‍🏫" },
   ];
 
   return (
@@ -51,22 +50,22 @@ export default function AdminPage() {
           Admin Dashboard
         </h1>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
-          {actions.map((action, idx) => (
-            <div
-              key={idx}
-              onClick={() =>
-                action.route
-                  ? navigate(action.route)
-                  : handleApiCall(action.endpoint)
-              }
-              className="cursor-pointer bg-gray-800/80 backdrop-blur-md border border-gray-700 rounded-2xl p-10 flex flex-col items-center justify-center text-center transition transform hover:scale-105 hover:shadow-2xl hover:bg-gray-700/90 duration-300"
-            >
-              <div className="text-5xl mb-4">{action.icon}</div>
-              <div className="text-lg font-semibold text-red-400">{action.name}</div>
-            </div>
-          ))}
-        </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
+            {actions.map((action, idx) => (
+              <div
+                key={idx}
+                onClick={() =>
+                  action.route
+                    ? navigate(action.route)
+                    : handleApiCall(action.endpoint)
+                }
+                className="cursor-pointer bg-gray-800/80 backdrop-blur-md border border-gray-700 rounded-2xl p-10 flex flex-col items-center justify-center text-center transition transform hover:scale-105 hover:shadow-2xl hover:bg-gray-700/90 duration-300"
+              >
+                <div className="text-5xl mb-4">{action.icon}</div>
+                <div className="text-lg font-semibold text-red-400">{action.name}</div>
+              </div>
+            ))}
+          </div>
 
         {/* API Response */}
         <div className="mt-12 max-w-4xl mx-auto space-y-4">

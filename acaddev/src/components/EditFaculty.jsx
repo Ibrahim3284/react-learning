@@ -3,77 +3,77 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 
-export default function EditStudent() {
+export default function EditFaculty() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [student, setStudent] = useState(null);
+  const [faculty, setFaculty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchStudent = async () => {
+    const fetchFaculty = async () => {
       try {
-        const token = localStorage.getItem("authToken")
-        const response = await fetch(`http://localhost:8080/student/${id}`, {
+        const token = localStorage.getItem("authToken");
+        const response = await fetch(`http://localhost:8080/faculty/${id}`, {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `${token}`
+            "Authorization": `${token}`,
           },
         });
-        if (!response.ok) throw new Error("Failed to fetch student");
+        if (!response.ok) throw new Error("Failed to fetch faculty");
         const data = await response.json();
-        setStudent(data);
+        setFaculty(data);
       } catch (err) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-    fetchStudent();
+    fetchFaculty();
   }, [id]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setStudent((prev) => ({
+    setFaculty((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : type === "number" ? Number(value) : value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem("authToken")
-      const response = await fetch(`http://localhost:8080/student/update/${id}`, {
+      const token = localStorage.getItem("authToken");
+      const response = await fetch(`http://localhost:8080/faculty/update/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `${token}`
+          "Authorization": `${token}`,
         },
         credentials: "include",
-        body: JSON.stringify(student),
+        body: JSON.stringify(faculty),
       });
 
-      if (!response.ok) throw new Error("Failed to update student");
+      if (!response.ok) throw new Error("Failed to update faculty");
 
-      alert("✅ Student updated successfully!");
-      navigate("/studentList");
+      alert("✅ Faculty updated successfully!");
+      navigate("/facultyList");
     } catch (err) {
       alert("❌ " + err.message);
     }
   };
 
-  if (loading) return <p className="text-center mt-6">Loading student...</p>;
+  if (loading) return <p className="text-center mt-6">Loading faculty...</p>;
   if (error) return <p className="text-center text-red-500 mt-6">{error}</p>;
-  if (!student) return null;
+  if (!faculty) return null;
 
   return (
     <>
       <Navbar />
       <div className="flex flex-col min-h-screen items-center justify-center p-6">
-        <h1 className="text-2xl font-bold mb-6">Edit Student</h1>
+        <h1 className="text-2xl font-bold mb-6">Edit Faculty</h1>
         <form
           onSubmit={handleSubmit}
           className="bg-white shadow-md rounded-lg p-6 w-full max-w-2xl space-y-4"
@@ -84,7 +84,7 @@ export default function EditStudent() {
             <input
               type="text"
               name="id"
-              value={student.id}
+              value={faculty.id}
               readOnly
               className="w-full border rounded p-2 bg-gray-100 cursor-not-allowed"
             />
@@ -96,7 +96,7 @@ export default function EditStudent() {
             <input
               type="text"
               name="firstName"
-              value={student.firstName || ""}
+              value={faculty.firstName || ""}
               onChange={handleChange}
               className="w-full border rounded p-2"
               required
@@ -109,10 +109,9 @@ export default function EditStudent() {
             <input
               type="text"
               name="lastName"
-              value={student.lastName || ""}
+              value={faculty.lastName || ""}
               onChange={handleChange}
               className="w-full border rounded p-2"
-              required
             />
           </div>
 
@@ -122,7 +121,7 @@ export default function EditStudent() {
             <input
               type="email"
               name="email"
-              value={student.email || ""}
+              value={faculty.email || ""}
               onChange={handleChange}
               className="w-full border rounded p-2"
               required
@@ -131,53 +130,40 @@ export default function EditStudent() {
 
           {/* Phone */}
           <div>
-            <label className="block font-semibold">Phone</label>
+            <label className="block font-semibold">Phone No</label>
             <input
               type="text"
               name="phoneNo"
-              value={student.phoneNo || ""}
+              value={faculty.phoneNo || ""}
               onChange={handleChange}
               className="w-full border rounded p-2"
+              required
             />
           </div>
 
-          {/* Gender */}
+          {/* Qualification */}
           <div>
-            <label className="block font-semibold">Gender</label>
-            <select
-              name="gender"
-              value={student.gender || ""}
-              onChange={handleChange}
-              className="w-full border rounded p-2"
-            >
-              <option value="">Select Gender</option>
-              <option value="MALE">Male</option>
-              <option value="FEMALE">Female</option>
-              <option value="OTHER">Other</option>
-            </select>
-          </div>
-
-          {/* Section */}
-          <div>
-            <label className="block font-semibold">Section</label>
+            <label className="block font-semibold">Qualification</label>
             <input
               type="text"
-              name="section"
-              value={student.section || ""}
+              name="qualification"
+              value={faculty.qualification || ""}
               onChange={handleChange}
               className="w-full border rounded p-2"
+              required
             />
           </div>
 
-          {/* Year */}
+          {/* Department */}
           <div>
-            <label className="block font-semibold">Year of Study</label>
+            <label className="block font-semibold">Department</label>
             <input
-              type="number"
-              name="yearOfStudy"
-              value={student.yearOfStudy || ""}
+              type="text"
+              name="department"
+              value={faculty.department || ""}
               onChange={handleChange}
               className="w-full border rounded p-2"
+              required
             />
           </div>
 
@@ -187,19 +173,50 @@ export default function EditStudent() {
             <input
               type="date"
               name="dateOfBirth"
-              value={student.dateOfBirth || ""}
+              value={faculty.dateOfBirth || ""}
               onChange={handleChange}
               className="w-full border rounded p-2"
+              required
             />
           </div>
 
-          {/* Enrollment Date */}
+          {/* DOJ */}
           <div>
-            <label className="block font-semibold">Enrollment Date</label>
+            <label className="block font-semibold">Date of Joining</label>
             <input
               type="date"
-              name="enrollmentDate"
-              value={student.enrollmentDate || ""}
+              name="dateOfJoining"
+              value={faculty.dateOfJoining || ""}
+              onChange={handleChange}
+              className="w-full border rounded p-2"
+              required
+            />
+          </div>
+
+          {/* Gender */}
+          <div>
+            <label className="block font-semibold">Gender</label>
+            <select
+              name="gender"
+              value={faculty.gender || ""}
+              onChange={handleChange}
+              className="w-full border rounded p-2"
+              required
+            >
+              <option value="">Select Gender</option>
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+
+          {/* LinkedIn */}
+          <div>
+            <label className="block font-semibold">LinkedIn Profile URL</label>
+            <input
+              type="url"
+              name="linkedInProfileURL"
+              value={faculty.linkedInProfileURL || ""}
               onChange={handleChange}
               className="w-full border rounded p-2"
             />
@@ -209,18 +226,19 @@ export default function EditStudent() {
           <div className="flex items-center space-x-2">
             <input
               type="checkbox"
-              name="active"
-              checked={student.active || student.isActive || false}
+              name="isActive"
+              checked={faculty.isActive || false}
               onChange={(e) =>
-                setStudent((prev) => ({
+                setFaculty((prev) => ({
                   ...prev,
-                  active: e.target.checked,
+                  isActive: e.target.checked,
                 }))
               }
             />
             <label className="font-semibold">Active</label>
           </div>
 
+          {/* Buttons */}
           <div className="flex justify-between">
             <button
               type="submit"
@@ -230,7 +248,7 @@ export default function EditStudent() {
             </button>
             <button
               type="button"
-              onClick={() => navigate("/studentList")}
+              onClick={() => navigate("/facultyList")}
               className="bg-gray-400 text-white px-6 py-2 rounded hover:bg-gray-500 transition"
             >
               Cancel

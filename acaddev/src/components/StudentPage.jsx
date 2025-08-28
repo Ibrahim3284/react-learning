@@ -1,11 +1,44 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
+import Footer from "./Footer";
 
 export default function AdminPage() {
   const [response, setResponse] = useState("");
   const [error, setError] = useState("");
+  const [studentDetails, setStudentDetails] = useState(null);
 
   const token = localStorage.getItem("authToken"); // get the token
+
+  // Fetch student details on page load
+  useEffect(() => {
+    const fetchStudentDetails = async () => {
+      if (!token) {
+        setError("No token found. Please login first.");
+        return;
+      }
+
+      try {
+        const res = await fetch("http://localhost:8080/student/getStudentDetails", {
+          method: "GET",
+          headers: {
+            "Authorization": token,
+          },
+        });
+
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+
+        const data = await res.json();
+        setStudentDetails(data);
+      } catch (err) {
+        console.error(err);
+        setError(err.message);
+      }
+    };
+
+    fetchStudentDetails();
+  }, [token]);
 
   const handleApiCall = async (endpoint) => {
     setError("");
@@ -28,7 +61,7 @@ export default function AdminPage() {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
 
-      const data = await res.text(); // or res.json()
+      const data = await res.text(); // or res.json() if API returns JSON
       setResponse(data);
     } catch (err) {
       console.error(err);
@@ -41,9 +74,16 @@ export default function AdminPage() {
       <Navbar />
       {/* Add top padding to avoid navbar overlap */}
       <div className="min-h-screen bg-gray-900 pt-24 px-6 text-white">
-        <h1 className="text-4xl sm:text-5xl font-extrabold text-center text-red-600 mb-12 tracking-wide">
+        <h1 className="text-4xl sm:text-5xl font-extrabold text-center text-red-600 mb-6 tracking-wide">
           Student Dashboard
         </h1>
+
+        {/* Show Welcome message */}
+        {studentDetails && (
+          <h2 className="text-2xl text-center text-green-400 font-semibold mb-12">
+            Welcome {studentDetails.firstName}
+          </h2>
+        )}
 
         {/* Dashboard Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -80,6 +120,7 @@ export default function AdminPage() {
           )}
         </div>
       </div>
+      <Footer />
     </>
   );
 }
