@@ -9,10 +9,25 @@ import { Upload, Image as ImageIcon } from "lucide-react";
 export default function AddTest() {
   const [title, setTitle] = useState("");
   const [subject, setSubject] = useState("");
+  const [startTime, setStartTime] = useState(""); // datetime-local field
+  const [duration, setDuration] = useState("");   // minutes
   const [questions, setQuestions] = useState([
     { option1: "", option2: "", option3: "", option4: "", rightOption: "", category: "", difficulty: "" },
   ]);
   const [images, setImages] = useState([]);
+
+  // 🔹 Helper: format datetime-local -> yyyy-MM-dd HH:mm:ss.SSS
+  const formatDateTime = (dateTimeValue) => {
+    if (!dateTimeValue) return "";
+    const date = new Date(dateTimeValue);
+    const pad = (num, size = 2) => String(num).padStart(size, "0");
+
+    return (
+      `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ` +
+      `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}.` +
+      `${String(date.getMilliseconds()).padStart(3, "0")}`
+    );
+  };
 
   const handleQuestionChange = (index, field, value) => {
     const updated = [...questions];
@@ -43,27 +58,36 @@ export default function AddTest() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
       const formData = new FormData();
       formData.append(
         "questionList",
         new Blob([JSON.stringify(questions)], { type: "application/json" })
       );
-
+  
       images.forEach((file) => {
         if (file) formData.append("imageFiles", file);
       });
-
+  
+      // 🔹 Format start_time before sending
+      const formattedStartTime = formatDateTime(startTime);
+  
+      // 🔹 Get authToken from localStorage
+      const authToken = localStorage.getItem("authToken");
+  
       const response = await axios.post(
-        `http://localhost:8081/test/add?title=${encodeURIComponent(title)}&subject=${encodeURIComponent(subject)}`,
+        `http://localhost:8081/test/add?title=${encodeURIComponent(title)}&subject=${encodeURIComponent(subject)}&start_time=${encodeURIComponent(formattedStartTime)}&duration=${encodeURIComponent(duration)}`,
         formData,
         {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: { 
+            "Content-Type": "multipart/form-data",
+            Authorization: authToken ? authToken : ""  // 🔹 Add token if available
+          },
           withCredentials: true,
         }
       );
-
+  
       Swal.fire({
         title: "✅ Test Added!",
         text: "Your test has been successfully created.",
@@ -71,7 +95,7 @@ export default function AddTest() {
         confirmButtonColor: "#16a34a",
         confirmButtonText: "Awesome 🚀",
       });
-
+  
       console.log("✅ Success:", response.data);
     } catch (error) {
       console.error("❌ Error:", error);
@@ -83,6 +107,7 @@ export default function AddTest() {
       });
     }
   };
+  
 
   return (
     <>
@@ -110,6 +135,25 @@ export default function AddTest() {
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 className="border p-3 rounded-xl w-full shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                required
+              />
+            </div>
+
+            {/* Start Time & Duration */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <input
+                type="datetime-local"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                className="border p-3 rounded-xl w-full shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none"
+                required
+              />
+              <input
+                type="number"
+                placeholder="Duration (in minutes)"
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                className="border p-3 rounded-xl w-full shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none"
                 required
               />
             </div>
