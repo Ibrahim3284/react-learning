@@ -24,6 +24,9 @@ import AddQuestion from "./components/AddQuestion";
 import AddTest from "./components/AddTest";
 import ListTests from "./components/ListTests";
 import TestDetails from "./components/TestDetails";
+import AllTests from "./components/AllTests";
+import TestPage from "./components/TestPage";
+import AttemptTest from "./components/AttemptTest";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -51,6 +54,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <Route path="/AddTest" element={<AddTest />} />
       <Route path="/ListTests" element={<ListTests />} />
       <Route path="/test/:id" element={<TestDetails />} />
+      <Route path="/allTests" element={<AllTests/> } />
+      <Route path="/testPage/:id" element={<TestPage/> } />
+      <Route path="/attempt/:id" element={<AttemptTest/> } />
     </Routes>
   </BrowserRouter>
 </React.StrictMode>
