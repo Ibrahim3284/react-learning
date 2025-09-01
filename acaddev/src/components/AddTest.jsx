@@ -17,16 +17,15 @@ export default function AddTest() {
   const [images, setImages] = useState([]);
 
   // 🔹 Helper: format datetime-local -> yyyy-MM-dd HH:mm:ss.SSS
+  // 🔹 Fix: Properly parse datetime-local string
   const formatDateTime = (dateTimeValue) => {
     if (!dateTimeValue) return "";
-    const date = new Date(dateTimeValue);
-    const pad = (num, size = 2) => String(num).padStart(size, "0");
+    // Example input: "2025-09-01T20:30"
+    const [datePart, timePart] = dateTimeValue.split("T");
+    if (!datePart || !timePart) return "";
 
-    return (
-      `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ` +
-      `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}.` +
-      `${String(date.getMilliseconds()).padStart(3, "0")}`
-    );
+    // Add seconds + milliseconds if missing
+    return `${datePart} ${timePart}:00.000`;
   };
 
   const handleQuestionChange = (index, field, value) => {
