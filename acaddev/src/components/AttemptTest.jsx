@@ -95,11 +95,26 @@ export default function AttemptTest() {
                   Question {currentIndex + 1} of {questions.length}
                 </h2>
 
-                {currentQuestion?.question && (
+                {/* Show question title if available */}
+                {currentQuestion?.questionTitle && (
+                  <p className="text-gray-900 text-base font-medium mb-4">
+                    {currentQuestion.questionTitle}
+                  </p>
+                )}
+
+                {/* Show question image (supports multiple formats) */}
+                {(currentQuestion?.questionImageData ||
+                  currentQuestion?.question) && (
                   <img
-                    src={`data:image/png;base64,${currentQuestion.question}`}
+                    src={
+                      currentQuestion?.questionImageData
+                        ? `data:${
+                            currentQuestion?.questionImageType || "image/png"
+                          };base64,${currentQuestion.questionImageData}`
+                        : `data:image/png;base64,${currentQuestion.question}`
+                    }
                     alt="Question"
-                    className="rounded-lg shadow mb-4 max-w-full"
+                    className="w-full max-h-[400px] object-contain rounded-md border mb-4"
                   />
                 )}
 

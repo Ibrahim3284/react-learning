@@ -38,8 +38,12 @@ export default function TestPage() {
     fetchQuestions();
   }, [id]);
 
-  if (loading) return <div className="p-6 text-center text-lg">Loading questions...</div>;
-  if (error) return <div className="p-6 text-red-500 text-center">Error: {error}</div>;
+  if (loading)
+    return <div className="p-6 text-center text-lg">Loading questions...</div>;
+  if (error)
+    return (
+      <div className="p-6 text-red-500 text-center">Error: {error}</div>
+    );
 
   return (
     <>
@@ -62,10 +66,19 @@ export default function TestPage() {
                   <h2 className="text-lg font-semibold text-gray-800 mb-4">
                     Question {idx + 1}
                   </h2>
+
+                  {/* Show title if available */}
+                  {q.questionTitle && (
+                    <p className="text-gray-700 text-base mb-4">
+                      {q.questionTitle}
+                    </p>
+                  )}
+
+                  {/* Show image if available */}
                   {q.question && (
                     <img
                       src={`data:image/png;base64,${q.question}`}
-                      alt="Question"
+                      alt={`Question ${idx + 1}`}
                       className="rounded-lg shadow mb-4 max-w-full"
                     />
                   )}

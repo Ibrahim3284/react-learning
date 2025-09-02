@@ -44,34 +44,36 @@ export default function AdminPage() {
   return (
     <>
       <Navbar />
-      {/* Add top padding to avoid navbar overlap */}
-      <div className="min-h-screen bg-gray-900 pt-24 px-6 text-white">
-        <h1 className="text-4xl sm:text-5xl font-extrabold text-center text-red-600 mb-6 tracking-wide">
+      {/* Main Container */}
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 pt-24 px-6 text-white">
+        
+        {/* Title */}
+        <h1 className="text-4xl sm:text-5xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-pink-400 to-purple-500 mb-6 tracking-wide drop-shadow-lg">
           Student Dashboard
         </h1>
 
-        {/* Show Welcome message */}
+        {/* Welcome Message */}
         {studentDetails && (
-          <h2 className="text-2xl text-center text-green-400 font-semibold mb-12">
-            Welcome {studentDetails.firstName}
+          <h2 className="text-2xl text-center font-semibold mb-12 text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-lime-500">
+            Welcome, {studentDetails.firstName} 👋
           </h2>
         )}
 
-        {/* Dashboard with only one button */}
+        {/* Dashboard Card */}
         <div className="flex justify-center">
           <button
             onClick={() => navigate("/allTests")}
-            className="bg-gray-800 hover:bg-gray-700 transition duration-300 shadow-lg rounded-lg p-8 flex flex-col items-center justify-center text-red-500 font-bold text-lg hover:scale-105 transform"
+            className="bg-gradient-to-r from-red-500 via-pink-500 to-purple-600 text-white font-bold text-lg px-10 py-5 rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 ease-in-out"
           >
-            Tests
+            🚀 View Tests
           </button>
         </div>
 
-        {/* Show error if any */}
+        {/* Error Box */}
         <div className="mt-12 max-w-4xl mx-auto">
           {error && (
-            <div className="p-4 bg-red-900 text-red-400 rounded-lg shadow-md mb-4 border border-red-600">
-              <span className="font-semibold">Error:</span> {error}
+            <div className="p-4 bg-red-900/70 text-red-300 rounded-lg shadow-md mb-4 border border-red-500 backdrop-blur-sm">
+              <span className="font-semibold">⚠ Error:</span> {error}
             </div>
           )}
         </div>

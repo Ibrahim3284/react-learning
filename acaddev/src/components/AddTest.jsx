@@ -1,31 +1,43 @@
 import React, { useState } from "react";
 import axios from "axios";
-import Swal from "sweetalert2"; // npm install sweetalert2
+import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import { Upload, Image as ImageIcon } from "lucide-react";
+import { Upload, Image as ImageIcon, PlusCircle, Trash2 } from "lucide-react";
 
 export default function AddTest() {
   const [title, setTitle] = useState("");
   const [subject, setSubject] = useState("");
-  const [startTime, setStartTime] = useState(""); // datetime-local field
-  const [duration, setDuration] = useState("");   // minutes
+  const [startTime, setStartTime] = useState("");
+  const [duration, setDuration] = useState("");
+  const [testWindow, setTestWindow] = useState("");
   const [questions, setQuestions] = useState([
-    { option1: "", option2: "", option3: "", option4: "", rightOption: "", category: "", difficulty: "" },
+    {
+      questionTitle: "",
+      option1: "",
+      option2: "",
+      option3: "",
+      option4: "",
+      rightOption: "",
+      category: "",
+      difficulty: "",
+      hasImage: false,
+    },
   ]);
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState([null]);
 
-  // 🔹 Helper: format datetime-local -> yyyy-MM-dd HH:mm:ss.SSS
-  // 🔹 Fix: Properly parse datetime-local string
+  // ✅ Format to yyyy-MM-dd HH:mm:ss.SSS
   const formatDateTime = (dateTimeValue) => {
     if (!dateTimeValue) return "";
-    // Example input: "2025-09-01T20:30"
-    const [datePart, timePart] = dateTimeValue.split("T");
-    if (!datePart || !timePart) return "";
-
-    // Add seconds + milliseconds if missing
-    return `${datePart} ${timePart}:00.000`;
+    const date = new Date(dateTimeValue);
+    const yyyy = date.getFullYear();
+    const MM = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    const HH = String(date.getHours()).padStart(2, "0");
+    const mm = String(date.getMinutes()).padStart(2, "0");
+    const ss = String(date.getSeconds()).padStart(2, "0");
+    return `${yyyy}-${MM}-${dd} ${HH}:${mm}:${ss}.000`;
   };
 
   const handleQuestionChange = (index, field, value) => {
@@ -37,7 +49,17 @@ export default function AddTest() {
   const addQuestion = () => {
     setQuestions([
       ...questions,
-      { option1: "", option2: "", option3: "", option4: "", rightOption: "", category: "", difficulty: "" },
+      {
+        questionTitle: "",
+        option1: "",
+        option2: "",
+        option3: "",
+        option4: "",
+        rightOption: "",
+        category: "",
+        difficulty: "",
+        hasImage: false,
+      },
     ]);
     setImages([...images, null]);
   };
@@ -52,41 +74,63 @@ export default function AddTest() {
   const handleImageUpload = (index, file) => {
     const updatedImages = [...images];
     updatedImages[index] = file;
+
+    const updatedQuestions = [...questions];
+    updatedQuestions[index].hasImage = !!file;
     setImages(updatedImages);
+    setQuestions(updatedQuestions);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
+    // validation: at least question text or image
+    for (let i = 0; i < questions.length; i++) {
+      if (!questions[i].questionTitle && !images[i]) {
+        Swal.fire({
+          title: "⚠ Validation Error",
+          text: `Question ${i + 1} must have either a title or an image.`,
+          icon: "warning",
+          confirmButtonColor: "#f59e0b",
+        });
+        return;
+      }
+    }
+
     try {
       const formData = new FormData();
       formData.append(
         "questionList",
         new Blob([JSON.stringify(questions)], { type: "application/json" })
       );
-  
+
       images.forEach((file) => {
         if (file) formData.append("imageFiles", file);
       });
-  
-      // 🔹 Format start_time before sending
+
       const formattedStartTime = formatDateTime(startTime);
-  
-      // 🔹 Get authToken from localStorage
       const authToken = localStorage.getItem("authToken");
-  
-      const response = await axios.post(
-        `http://localhost:8081/test/add?title=${encodeURIComponent(title)}&subject=${encodeURIComponent(subject)}&start_time=${encodeURIComponent(formattedStartTime)}&duration=${encodeURIComponent(duration)}`,
+
+      await axios.post(
+        `http://localhost:8081/test/add?title=${encodeURIComponent(
+          title
+        )}&subject=${encodeURIComponent(
+          subject
+        )}&start_time=${encodeURIComponent(
+          formattedStartTime
+        )}&duration=${encodeURIComponent(
+          duration * 60
+        )}&test_window=${encodeURIComponent(testWindow * 60)}`,
         formData,
         {
-          headers: { 
+          headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: authToken ? authToken : ""  // 🔹 Add token if available
+            Authorization: authToken || "",
           },
           withCredentials: true,
         }
       );
-  
+
       Swal.fire({
         title: "✅ Test Added!",
         text: "Your test has been successfully created.",
@@ -94,8 +138,6 @@ export default function AddTest() {
         confirmButtonColor: "#16a34a",
         confirmButtonText: "Awesome 🚀",
       });
-  
-      console.log("✅ Success:", response.data);
     } catch (error) {
       console.error("❌ Error:", error);
       Swal.fire({
@@ -106,133 +148,194 @@ export default function AddTest() {
       });
     }
   };
-  
 
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-r from-blue-50 via-white to-purple-50 flex items-center justify-center p-6">
-        <div className="bg-white shadow-2xl rounded-3xl p-10 w-full max-w-5xl transform transition-all duration-500 hover:shadow-3xl">
-          <h2 className="text-3xl font-extrabold text-gray-800 mb-8 text-center tracking-tight">
-            ➕ Create a New Test
-          </h2>
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 px-6 py-12">
+        <div className="relative w-full max-w-5xl bg-gray-800 rounded-3xl shadow-2xl border border-gray-700 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-pink-600 to-red-500 opacity-10 blur-3xl -z-10"></div>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Title & Subject */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <input
-                type="text"
-                placeholder="Test Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="border p-3 rounded-xl w-full shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                required
-              />
-              <input
-                type="text"
-                placeholder="Subject"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                className="border p-3 rounded-xl w-full shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                required
-              />
-            </div>
+          <div className="p-10">
+            <h2 className="text-4xl font-extrabold text-center text-white mb-12">
+              ✨ Create a New Test
+            </h2>
 
-            {/* Start Time & Duration */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <input
-                type="datetime-local"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                className="border p-3 rounded-xl w-full shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-                required
-              />
-              <input
-                type="number"
-                placeholder="Duration (in minutes)"
-                value={duration}
-                onChange={(e) => setDuration(e.target.value)}
-                className="border p-3 rounded-xl w-full shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-                required
-              />
-            </div>
+            <form onSubmit={handleSubmit} className="space-y-12">
+              {/* Test Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Test Title"
+                  required
+                  className="w-full px-5 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 text-white placeholder-gray-400"
+                />
+                <input
+                  type="text"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  placeholder="Subject"
+                  required
+                  className="w-full px-5 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 text-white placeholder-gray-400"
+                />
+              </div>
 
-            {/* Questions */}
-            {questions.map((q, i) => (
-              <div
-                key={i}
-                className="border rounded-2xl p-6 space-y-4 bg-gradient-to-br from-gray-50 to-gray-100 relative shadow-md hover:shadow-lg transition"
-              >
-                <h3 className="font-semibold text-lg text-gray-700">📘 Question {i + 1}</h3>
+              {/* Start Time & Duration & Test Window */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <input
+                  type="datetime-local"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  required
+                  className="w-full px-5 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+                />
+                <input
+                  type="number"
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                  placeholder="Duration (minutes)"
+                  required
+                  className="w-full px-5 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-gray-400"
+                />
+                <input
+                  type="number"
+                  value={testWindow}
+                  onChange={(e) => setTestWindow(e.target.value)}
+                  placeholder="Test Window (minutes)"
+                  required
+                  className="w-full px-5 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-gray-400"
+                />
+              </div>
+
+              {/* Questions */}
+              {questions.map((q, i) => (
+                <div
+                  key={i}
+                  className="relative border border-gray-600 rounded-2xl p-6 bg-gray-700 shadow-md"
+                >
+                  <span className="absolute -top-4 left-4 bg-purple-600 text-white px-3 py-1 rounded-full shadow">
+                    Q{i + 1}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeQuestion(i)}
+                    className="absolute top-3 right-3 text-red-400 hover:text-red-600 transition"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+
+                  <input
+                    type="text"
+                    placeholder="Question Title"
+                    value={q.questionTitle}
+                    onChange={(e) =>
+                      handleQuestionChange(i, "questionTitle", e.target.value)
+                    }
+                    className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4"
+                  />
+
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    {["option1", "option2", "option3", "option4"].map(
+                      (opt, idx) => (
+                        <input
+                          key={idx}
+                          type="text"
+                          placeholder={`Option ${idx + 1}`}
+                          value={q[opt]}
+                          onChange={(e) =>
+                            handleQuestionChange(i, opt, e.target.value)
+                          }
+                          className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-indigo-500"
+                        />
+                      )
+                    )}
+                  </div>
+
+                  <input
+                    type="text"
+                    placeholder="Correct Answer"
+                    value={q.rightOption}
+                    onChange={(e) =>
+                      handleQuestionChange(i, "rightOption", e.target.value)
+                    }
+                    className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-green-500 mb-4"
+                  />
+
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <input
+                      type="text"
+                      placeholder="Category"
+                      value={q.category}
+                      onChange={(e) =>
+                        handleQuestionChange(i, "category", e.target.value)
+                      }
+                      className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Difficulty"
+                      value={q.difficulty}
+                      onChange={(e) =>
+                        handleQuestionChange(i, "difficulty", e.target.value)
+                      }
+                      className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+
+                  {/* Image Upload */}
+                  <div className="border-2 border-dashed border-gray-500 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-600 transition">
+                    <label className="cursor-pointer flex flex-col items-center">
+                      <Upload className="text-pink-500 mb-2" size={24} />
+                      <span className="text-sm text-gray-300">
+                        {images[i] ? "Change Image" : "Upload Image"}
+                      </span>
+                      <input
+                        type="file"
+                        className="hidden"
+                        onChange={(e) =>
+                          handleImageUpload(i, e.target.files[0] || null)
+                        }
+                        accept="image/*"
+                      />
+                    </label>
+
+                    {images[i] && (
+                      <div className="mt-3 flex items-center justify-center gap-3">
+                        <ImageIcon className="text-gray-400" size={20} />
+                        <span className="text-sm text-gray-300 truncate max-w-xs">
+                          {images[i].name}
+                        </span>
+                        <img
+                          src={URL.createObjectURL(images[i])}
+                          alt="preview"
+                          className="h-16 w-16 object-cover rounded-lg shadow"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              {/* Action Buttons */}
+              <div className="flex justify-between items-center mt-10">
                 <button
                   type="button"
-                  onClick={() => removeQuestion(i)}
-                  className="absolute top-3 right-3 text-red-500 hover:text-red-700 transition"
+                  onClick={addQuestion}
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl shadow-md hover:scale-105 transition-transform"
                 >
-                  ✖
+                  <PlusCircle size={18} /> Add Question
                 </button>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <input type="text" placeholder="Option 1" value={q.option1} onChange={(e) => handleQuestionChange(i, "option1", e.target.value)} className="border p-2 rounded-lg focus:ring focus:ring-blue-300" />
-                  <input type="text" placeholder="Option 2" value={q.option2} onChange={(e) => handleQuestionChange(i, "option2", e.target.value)} className="border p-2 rounded-lg focus:ring focus:ring-blue-300" />
-                  <input type="text" placeholder="Option 3" value={q.option3} onChange={(e) => handleQuestionChange(i, "option3", e.target.value)} className="border p-2 rounded-lg focus:ring focus:ring-blue-300" />
-                  <input type="text" placeholder="Option 4" value={q.option4} onChange={(e) => handleQuestionChange(i, "option4", e.target.value)} className="border p-2 rounded-lg focus:ring focus:ring-blue-300" />
-                </div>
-
-                <input type="text" placeholder="Right Option" value={q.rightOption} onChange={(e) => handleQuestionChange(i, "rightOption", e.target.value)} className="border p-2 rounded-lg w-full focus:ring focus:ring-green-300" />
-
-                <div className="grid grid-cols-2 gap-3">
-                  <input type="text" placeholder="Category" value={q.category} onChange={(e) => handleQuestionChange(i, "category", e.target.value)} className="border p-2 rounded-lg focus:ring focus:ring-purple-300" />
-                  <input type="text" placeholder="Difficulty" value={q.difficulty} onChange={(e) => handleQuestionChange(i, "difficulty", e.target.value)} className="border p-2 rounded-lg focus:ring focus:ring-purple-300" />
-                </div>
-
-                {/* Modern Upload Button */}
-                <div>
-                  <label className="block font-medium text-gray-700 mb-2">📷 Upload Image</label>
-                  <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 transition">
-                    <Upload size={18} />
-                    <span>Choose File</span>
-                    <input
-                      type="file"
-                      className="hidden"
-                      onChange={(e) => handleImageUpload(i, e.target.files[0])}
-                      accept="image/*"
-                    />
-                  </label>
-
-                  {/* Preview */}
-                  {images[i] && (
-                    <div className="mt-3 flex items-center gap-3">
-                      <ImageIcon className="text-gray-500" size={20} />
-                      <span className="text-sm text-gray-600 truncate max-w-xs">{images[i].name}</span>
-                      <img
-                        src={URL.createObjectURL(images[i])}
-                        alt="preview"
-                        className="h-16 w-16 object-cover rounded-lg shadow"
-                      />
-                    </div>
-                  )}
-                </div>
+                <button
+                  type="submit"
+                  className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl shadow-md hover:scale-105 transition-transform"
+                >
+                  ✅ Submit Test
+                </button>
               </div>
-            ))}
-
-            {/* Buttons */}
-            <div className="flex justify-between items-center">
-              <button
-                type="button"
-                onClick={addQuestion}
-                className="bg-blue-500 text-white px-5 py-2 rounded-xl shadow-md hover:bg-blue-600 active:scale-95 transition"
-              >
-                ➕ Add Question
-              </button>
-              <button
-                type="submit"
-                className="bg-green-600 text-white px-8 py-3 rounded-xl shadow-md hover:bg-green-700 active:scale-95 transition font-semibold"
-              >
-                ✅ Submit Test
-              </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
       <Footer />
