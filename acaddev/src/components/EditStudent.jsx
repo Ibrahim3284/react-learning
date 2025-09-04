@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
 
 export default function EditStudent() {
   const { id } = useParams();
@@ -14,12 +16,12 @@ export default function EditStudent() {
   useEffect(() => {
     const fetchStudent = async () => {
       try {
-        const token = localStorage.getItem("authToken")
+        const token = localStorage.getItem("authToken");
         const response = await fetch(`http://localhost:8080/student/${id}`, {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `${token}`
+            Authorization: `${token}`,
           },
         });
         if (!response.ok) throw new Error("Failed to fetch student");
@@ -45,12 +47,12 @@ export default function EditStudent() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem("authToken")
+      const token = localStorage.getItem("authToken");
       const response = await fetch(`http://localhost:8080/student/update/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `${token}`
+          Authorization: `${token}`,
         },
         credentials: "include",
         body: JSON.stringify(student),
@@ -58,185 +60,196 @@ export default function EditStudent() {
 
       if (!response.ok) throw new Error("Failed to update student");
 
-      alert("✅ Student updated successfully!");
+      Swal.fire({
+        title: "✅ Student Updated",
+        icon: "success",
+        confirmButtonColor: "#16a34a",
+      });
+
       navigate("/studentList");
     } catch (err) {
-      alert("❌ " + err.message);
+      Swal.fire({
+        title: "❌ Error",
+        text: err.message,
+        icon: "error",
+        confirmButtonColor: "#dc2626",
+      });
     }
   };
 
-  if (loading) return <p className="text-center mt-6">Loading student...</p>;
-  if (error) return <p className="text-center text-red-500 mt-6">{error}</p>;
+  if (loading)
+    return <p className="text-center text-white mt-6">Loading student...</p>;
+  if (error)
+    return <p className="text-center text-red-400 mt-6">{error}</p>;
   if (!student) return null;
 
   return (
     <>
       <Navbar />
-      <div className="flex flex-col min-h-screen items-center justify-center p-6">
-        <h1 className="text-2xl font-bold mb-6">Edit Student</h1>
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white shadow-md rounded-lg p-6 w-full max-w-2xl space-y-4"
-        >
-          {/* ID (Read-only) */}
-          <div>
-            <label className="block font-semibold">ID</label>
-            <input
-              type="text"
-              name="id"
-              value={student.id}
-              readOnly
-              className="w-full border rounded p-2 bg-gray-100 cursor-not-allowed"
-            />
-          </div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 px-6 py-16">
+        <div className="relative w-full max-w-4xl bg-gray-800 rounded-3xl shadow-2xl border border-gray-700 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-rose-600 via-purple-600 to-blue-500 opacity-10 blur-3xl -z-10"></div>
 
-          {/* First Name */}
-          <div>
-            <label className="block font-semibold">First Name</label>
-            <input
-              type="text"
-              name="firstName"
-              value={student.firstName || ""}
-              onChange={handleChange}
-              className="w-full border rounded p-2"
-              required
-            />
-          </div>
+          <div className="p-10">
+            <h2 className="text-4xl font-extrabold text-center text-white mb-12">
+              ✏ Edit Student
+            </h2>
 
-          {/* Last Name */}
-          <div>
-            <label className="block font-semibold">Last Name</label>
-            <input
-              type="text"
-              name="lastName"
-              value={student.lastName || ""}
-              onChange={handleChange}
-              className="w-full border rounded p-2"
-              required
-            />
-          </div>
-
-          {/* Email */}
-          <div>
-            <label className="block font-semibold">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={student.email || ""}
-              onChange={handleChange}
-              className="w-full border rounded p-2"
-              required
-            />
-          </div>
-
-          {/* Phone */}
-          <div>
-            <label className="block font-semibold">Phone</label>
-            <input
-              type="text"
-              name="phoneNo"
-              value={student.phoneNo || ""}
-              onChange={handleChange}
-              className="w-full border rounded p-2"
-            />
-          </div>
-
-          {/* Gender */}
-          <div>
-            <label className="block font-semibold">Gender</label>
-            <select
-              name="gender"
-              value={student.gender || ""}
-              onChange={handleChange}
-              className="w-full border rounded p-2"
+            <form
+              onSubmit={handleSubmit}
+              className="grid grid-cols-1 md:grid-cols-2 gap-6"
             >
-              <option value="">Select Gender</option>
-              <option value="MALE">Male</option>
-              <option value="FEMALE">Female</option>
-              <option value="OTHER">Other</option>
-            </select>
-          </div>
+              {/* ID (Read-only) */}
+              <div>
+                <label className="text-white font-medium">ID</label>
+                <input
+                  type="text"
+                  name="id"
+                  value={student.id}
+                  readOnly
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white cursor-not-allowed"
+                />
+              </div>
 
-          {/* Section */}
-          <div>
-            <label className="block font-semibold">Section</label>
-            <input
-              type="text"
-              name="section"
-              value={student.section || ""}
-              onChange={handleChange}
-              className="w-full border rounded p-2"
-            />
-          </div>
+              <div>
+                <label className="text-white font-medium">First Name</label>
+                <input
+                  type="text"
+                  name="firstName"
+                  value={student.firstName || ""}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white"
+                />
+              </div>
 
-          {/* Year */}
-          <div>
-            <label className="block font-semibold">Year of Study</label>
-            <input
-              type="number"
-              name="yearOfStudy"
-              value={student.yearOfStudy || ""}
-              onChange={handleChange}
-              className="w-full border rounded p-2"
-            />
-          </div>
+              <div>
+                <label className="text-white font-medium">Last Name</label>
+                <input
+                  type="text"
+                  name="lastName"
+                  value={student.lastName || ""}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white"
+                />
+              </div>
 
-          {/* DOB */}
-          <div>
-            <label className="block font-semibold">Date of Birth</label>
-            <input
-              type="date"
-              name="dateOfBirth"
-              value={student.dateOfBirth || ""}
-              onChange={handleChange}
-              className="w-full border rounded p-2"
-            />
-          </div>
+              <div>
+                <label className="text-white font-medium">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={student.email || ""}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white"
+                />
+              </div>
 
-          {/* Enrollment Date */}
-          <div>
-            <label className="block font-semibold">Enrollment Date</label>
-            <input
-              type="date"
-              name="enrollmentDate"
-              value={student.enrollmentDate || ""}
-              onChange={handleChange}
-              className="w-full border rounded p-2"
-            />
-          </div>
+              <div>
+                <label className="text-white font-medium">Phone Number</label>
+                <input
+                  type="text"
+                  name="phoneNo"
+                  value={student.phoneNo || ""}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white"
+                />
+              </div>
 
-          {/* Active */}
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              name="active"
-              checked={student.active || student.isActive || false}
-              onChange={(e) =>
-                setStudent((prev) => ({
-                  ...prev,
-                  active: e.target.checked,
-                }))
-              }
-            />
-            <label className="font-semibold">Active</label>
-          </div>
+              <div>
+                <label className="text-white font-medium">Gender</label>
+                <select
+                  name="gender"
+                  value={student.gender || ""}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white"
+                >
+                  <option value="">Select Gender</option>
+                  <option value="MALE">Male</option>
+                  <option value="FEMALE">Female</option>
+                  <option value="OTHER">Other</option>
+                </select>
+              </div>
 
-          <div className="flex justify-between">
-            <button
-              type="submit"
-              className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition"
-            >
-              Update
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate("/studentList")}
-              className="bg-gray-400 text-white px-6 py-2 rounded hover:bg-gray-500 transition"
-            >
-              Cancel
-            </button>
+              <div>
+                <label className="text-white font-medium">Section</label>
+                <input
+                  type="text"
+                  name="section"
+                  value={student.section || ""}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white"
+                />
+              </div>
+
+              <div>
+                <label className="text-white font-medium">Year of Study</label>
+                <input
+                  type="number"
+                  name="yearOfStudy"
+                  value={student.yearOfStudy || ""}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white"
+                />
+              </div>
+
+              <div>
+                <label className="text-white font-medium">Date of Birth</label>
+                <input
+                  type="date"
+                  name="dateOfBirth"
+                  value={student.dateOfBirth || ""}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white"
+                />
+              </div>
+
+              <div>
+                <label className="text-white font-medium">Enrollment Date</label>
+                <input
+                  type="date"
+                  name="enrollmentDate"
+                  value={student.enrollmentDate || ""}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white"
+                />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  name="active"
+                  checked={student.active || student.isActive || false}
+                  onChange={(e) =>
+                    setStudent((prev) => ({
+                      ...prev,
+                      active: e.target.checked,
+                    }))
+                  }
+                  className="h-5 w-5 text-green-500"
+                />
+                <label className="text-white font-medium">Active</label>
+              </div>
+            </form>
+
+            <div className="mt-10 text-center flex justify-center gap-4">
+              <button
+                onClick={handleSubmit}
+                className="px-8 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-xl shadow-md hover:scale-105 transition-transform"
+              >
+                💾 Update Student
+              </button>
+              <button
+                onClick={() => navigate("/studentList")}
+                className="px-8 py-3 bg-gray-500 text-white font-semibold rounded-xl hover:bg-gray-600 transition"
+              >
+                ❌ Cancel
+              </button>
+            </div>
           </div>
-        </form>
+        </div>
       </div>
       <Footer />
     </>
