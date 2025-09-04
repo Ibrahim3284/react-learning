@@ -80,98 +80,109 @@ export default function AttemptTest() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-8">
-          <h1 className="text-2xl font-bold mb-6 text-gray-800">
-            📝 Attempt Test (ID: {id})
-          </h1>
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 px-6 py-12">
+        <div className="relative w-full max-w-4xl bg-gray-800 rounded-3xl shadow-2xl border border-gray-700 overflow-hidden">
+          {/* Gradient Glow Background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-pink-600 to-red-500 opacity-10 blur-3xl -z-10"></div>
 
-          {questions.length === 0 ? (
-            <p className="text-gray-600">No questions received.</p>
-          ) : (
-            <>
-              <div className="border border-gray-200 rounded-xl shadow-sm p-6 bg-gray-50">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                  Question {currentIndex + 1} of {questions.length}
-                </h2>
+          <div className="p-10">
+            <h1 className="text-3xl font-extrabold text-center text-white mb-10">
+              📝 Attempt Test (ID: {id})
+            </h1>
 
-                {/* Show question title if available */}
-                {currentQuestion?.questionTitle && (
-                  <p className="text-gray-900 text-base font-medium mb-4">
-                    {currentQuestion.questionTitle}
-                  </p>
-                )}
+            {questions.length === 0 ? (
+              <p className="text-gray-400 text-center">
+                No questions received.
+              </p>
+            ) : (
+              <>
+                <div className="border border-gray-600 rounded-2xl p-6 bg-gray-700 shadow-md">
+                  <h2 className="text-lg font-semibold text-purple-300 mb-4">
+                    Question {currentIndex + 1} of {questions.length}
+                  </h2>
 
-                {/* Show question image (supports multiple formats) */}
-                {(currentQuestion?.questionImageData ||
-                  currentQuestion?.question) && (
-                  <img
-                    src={
-                      currentQuestion?.questionImageData
-                        ? `data:${
-                            currentQuestion?.questionImageType || "image/png"
-                          };base64,${currentQuestion.questionImageData}`
-                        : `data:image/png;base64,${currentQuestion.question}`
-                    }
-                    alt="Question"
-                    className="w-full max-h-[400px] object-contain rounded-md border mb-4"
-                  />
-                )}
+                  {/* Question Title */}
+                  {currentQuestion?.questionTitle && (
+                    <p className="text-gray-100 text-base font-medium mb-4">
+                      {currentQuestion.questionTitle}
+                    </p>
+                  )}
 
-                <div className="space-y-3">
-                  {["option1", "option2", "option3", "option4"].map((opt) => (
-                    <label
-                      key={opt}
-                      className="flex items-center space-x-3 p-3 bg-white rounded-lg shadow hover:bg-gray-100 cursor-pointer"
-                    >
-                      <input
-                        type="radio"
-                        name={`question-${currentQuestion.id}`}
-                        value={currentQuestion[opt]}
-                        checked={
-                          answers.find((a) => a.questionId === currentQuestion.id)
-                            ?.optionSelected === currentQuestion[opt]
-                        }
-                        onChange={() =>
-                          handleSelect(currentQuestion.id, currentQuestion[opt])
-                        }
-                        className="h-4 w-4 text-indigo-600"
-                      />
-                      <span className="text-gray-700">{currentQuestion[opt]}</span>
-                    </label>
-                  ))}
+                  {/* Question Image */}
+                  {(currentQuestion?.questionImageData ||
+                    currentQuestion?.question) && (
+                    <img
+                      src={
+                        currentQuestion?.questionImageData
+                          ? `data:${
+                              currentQuestion?.questionImageType || "image/png"
+                            };base64,${currentQuestion.questionImageData}`
+                          : `data:image/png;base64,${currentQuestion.question}`
+                      }
+                      alt="Question"
+                      className="w-full max-h-[400px] object-contain rounded-lg border border-gray-600 mb-4 shadow"
+                    />
+                  )}
+
+                  {/* Options */}
+                  <div className="space-y-3">
+                    {["option1", "option2", "option3", "option4"].map((opt) => (
+                      <label
+                        key={opt}
+                        className="flex items-center space-x-3 p-3 bg-gray-800 border border-gray-600 rounded-xl shadow hover:bg-gray-600 cursor-pointer transition"
+                      >
+                        <input
+                          type="radio"
+                          name={`question-${currentQuestion.id}`}
+                          value={currentQuestion[opt]}
+                          checked={
+                            answers.find(
+                              (a) => a.questionId === currentQuestion.id
+                            )?.optionSelected === currentQuestion[opt]
+                          }
+                          onChange={() =>
+                            handleSelect(currentQuestion.id, currentQuestion[opt])
+                          }
+                          className="h-4 w-4 text-pink-500 focus:ring-pink-500"
+                        />
+                        <span className="text-gray-200">
+                          {currentQuestion[opt]}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              {/* Navigation Buttons */}
-              <div className="flex justify-between mt-8">
-                <button
-                  onClick={handlePrev}
-                  disabled={currentIndex === 0}
-                  className="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg shadow hover:bg-gray-400 disabled:opacity-50"
-                >
-                  ⬅ Previous
-                </button>
+                {/* Navigation Buttons */}
+                <div className="flex justify-between mt-10">
+                  <button
+                    onClick={handlePrev}
+                    disabled={currentIndex === 0}
+                    className="px-6 py-3 bg-gray-600 text-white rounded-xl shadow-md hover:bg-gray-500 disabled:opacity-50 transition"
+                  >
+                    ⬅ Previous
+                  </button>
 
-                {currentIndex < questions.length - 1 ? (
-                  <button
-                    onClick={handleNext}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700"
-                  >
-                    Next ➡
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleSubmit}
-                    disabled={submitting}
-                    className="px-6 py-2 bg-green-600 text-white font-semibold rounded-lg shadow hover:bg-green-700 disabled:opacity-50"
-                  >
-                    {submitting ? "Submitting..." : "Submit Test"}
-                  </button>
-                )}
-              </div>
-            </>
-          )}
+                  {currentIndex < questions.length - 1 ? (
+                    <button
+                      onClick={handleNext}
+                      className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl shadow-md hover:scale-105 transition-transform"
+                    >
+                      Next ➡
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleSubmit}
+                      disabled={submitting}
+                      className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl shadow-md hover:scale-105 transition-transform disabled:opacity-50"
+                    >
+                      {submitting ? "Submitting..." : "✅ Submit Test"}
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
       <Footer />
