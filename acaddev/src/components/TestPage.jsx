@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+const testServiceBaseURL = import.meta.env.VITE_TEST_SERVICE_BASE_URL;
 
 export default function TestPage() {
   const { id } = useParams();
@@ -14,7 +15,7 @@ export default function TestPage() {
       try {
         const token = localStorage.getItem("authToken");
         const res = await fetch(
-          `http://localhost:8081/test/get/questionWrapper/${id}`,
+          testServiceBaseURL + `/test/get/questionWrapper/${id}`,
           {
             method: "GET",
             headers: {

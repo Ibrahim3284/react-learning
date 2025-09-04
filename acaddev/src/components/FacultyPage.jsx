@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { FilePlus2, ListChecks, GraduationCap } from "lucide-react"; // ✅ icons
+const userServiceBaseURL = import.meta.env.VITE_USER_SERVICE_BASE_URL;
 
 export default function FacultyPage() {
   const [response, setResponse] = useState("");
@@ -20,7 +21,7 @@ export default function FacultyPage() {
       }
 
       try {
-        const res = await fetch("http://localhost:8080/faculty/getFacultyDetails", {
+        const res = await fetch(userServiceBaseURL + "/faculty/getFacultyDetails", {
           method: "GET",
           headers: { Authorization: token },
         });

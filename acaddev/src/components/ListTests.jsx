@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+const testServiceBaseURL = import.meta.env.VITE_TEST_SERVICE_BASE_URL;
 
 export default function ListTests() {
   const [tests, setTests] = useState([]);
@@ -13,7 +14,7 @@ export default function ListTests() {
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     axios
-      .get("http://localhost:8081/test/getAll", {
+      .get(testServiceBaseURL + "/test/getAll", {
         headers: {
           Authorization: `${token}`,
         },

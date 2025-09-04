@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+const userServiceBaseURL = import.meta.env.VITE_USER_SERVICE_BASE_URL;
 
 export default function UpdateStudent({ studentId }) {
   const [student, setStudent] = useState({
@@ -18,7 +19,7 @@ export default function UpdateStudent({ studentId }) {
   // Fetch existing student details by ID
   useEffect(() => {
     if (studentId) {
-      fetch(`http://localhost:8080/student/${studentId}`, {
+      fetch(userServiceBaseURL + `/student/${studentId}`, {
         method: "GET",
         credentials: "include",
       })
@@ -41,7 +42,7 @@ export default function UpdateStudent({ studentId }) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    fetch(`http://localhost:8080/student/update/${student.id}`, {
+    fetch(userServiceBaseURL + `/student/update/${student.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

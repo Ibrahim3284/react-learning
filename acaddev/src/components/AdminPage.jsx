@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { FiCheckCircle, FiAlertCircle } from "react-icons/fi";
+const userServiceBaseURL = import.meta.env.VITE_USER_SERVICE_BASE_URL;
 
 export default function AdminPage() {
   const [response, setResponse] = useState("");
@@ -21,7 +22,7 @@ export default function AdminPage() {
     }
 
     try {
-      const res = await fetch(`http://localhost:8080/${endpoint}`, {
+      const res = await fetch(userServiceBaseURL + `/${endpoint}`, {
         method: "GET",
         headers: { Authorization: token },
       });

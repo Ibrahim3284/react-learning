@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+const testServiceBaseURL = import.meta.env.VITE_TEST_SERVICE_BASE_URL;
 
 export default function AllTests() {
   const [tests, setTests] = useState([]);
@@ -13,7 +14,7 @@ export default function AllTests() {
     const fetchTests = async () => {
       try {
         const token = localStorage.getItem("authToken");
-        const res = await fetch("http://localhost:8081/test/getAll", {
+        const res = await fetch(testServiceBaseURL + "/test/getAll", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -39,7 +40,7 @@ export default function AllTests() {
   const handleAttempt = async (testId) => {
     try {
       const token = localStorage.getItem("authToken");
-      const res = await fetch(`http://localhost:8081/test/attempt/${testId}`, {
+      const res = await fetch(testServiceBaseURL + `/test/attempt/${testId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

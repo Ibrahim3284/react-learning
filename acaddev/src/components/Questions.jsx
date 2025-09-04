@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+const testServiceBaseURL = import.meta.env.VITE_TEST_SERVICE_BASE_URL;
 
 export default function QuestionsPage() {
   const [questions, setQuestions] = useState([]);
@@ -11,7 +12,7 @@ export default function QuestionsPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    fetch("http://localhost:8081/question/getAllQuestions")
+    fetch(testServiceBaseURL + "/question/getAllQuestions")
       .then((res) => res.json())
       .then((data) => {
         setQuestions(data);

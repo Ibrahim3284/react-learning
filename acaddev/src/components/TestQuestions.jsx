@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+const testServiceBaseURL = import.meta.env.VITE_TEST_SERVICE_BASE_URL;
 
 export default function TestQuestions() {
   const { id } = useParams();
@@ -13,7 +14,7 @@ export default function TestQuestions() {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const res = await fetch(`http://localhost:8081/test/get/questionWrapper/${id}`, {
+        const res = await fetch(testServiceBaseURL + `/test/get/questionWrapper/${id}`, {
           method: "GET",
           headers: {
             Authorization: token,

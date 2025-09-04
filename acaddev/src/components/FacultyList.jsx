@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+const userServiceBaseURL = import.meta.env.VITE_USER_SERVICE_BASE_URL;
 
 export default function FacultyList() {
   const [faculty, setFaculty] = useState([]);
@@ -23,7 +24,7 @@ export default function FacultyList() {
     try {
       const token = localStorage.getItem("authToken");
       const response = await fetch(
-        `http://localhost:8080/faculty/allFaculties?page_size=${pageSize}&page_no=${pageNo}`,
+        userServiceBaseURL + `/faculty/allFaculties?page_size=${pageSize}&page_no=${pageNo}`,
         {
           credentials: "include",
           headers: {
@@ -69,7 +70,7 @@ export default function FacultyList() {
   const handleConfirmDelete = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const response = await fetch(`http://localhost:8080/faculty/${deleteFacultyId}`, {
+      const response = await fetch(userServiceBaseURL + `/faculty/${deleteFacultyId}`, {
         method: "DELETE",
         credentials: "include",
         headers: {

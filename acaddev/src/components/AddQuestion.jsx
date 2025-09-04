@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Dialog } from "@headlessui/react";
+const testServiceBaseURL = import.meta.env.VITE_TEST_SERVICE_BASE_URL;
 
 export default function AddQuestion() {
   const emptyQuestion = {
@@ -53,7 +54,7 @@ export default function AddQuestion() {
         );
         if (image) data.append("imageFile", image);
 
-        const res = await fetch("http://localhost:8081/question/add", {
+        const res = await fetch(testServiceBaseURL + "/question/add", {
           method: "POST",
           credentials: "include",
           body: data,

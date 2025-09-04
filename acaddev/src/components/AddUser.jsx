@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+const userServiceBaseURL = import.meta.env.VITE_USER_SERVICE_BASE_URL;
 
 export default function AddUser() {
   const [formData, setFormData] = useState({
@@ -24,7 +25,7 @@ export default function AddUser() {
     e.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:8080/question/add", formData);
+      const response = await axios.post(userServiceBaseURL + "/question/add", formData);
       alert("Question added successfully!");
       console.log(response.data);
     } catch (error) {

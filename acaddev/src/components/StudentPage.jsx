@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+const userServiceBaseURL = import.meta.env.VITE_USER_SERVICE_BASE_URL;
 
 export default function AdminPage() {
   const [error, setError] = useState("");
@@ -19,7 +20,7 @@ export default function AdminPage() {
       }
 
       try {
-        const res = await fetch("http://localhost:8080/student/getStudentDetails", {
+        const res = await fetch(userServiceBaseURL + "/student/getStudentDetails", {
           method: "GET",
           headers: {
             Authorization: token,

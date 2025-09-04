@@ -5,6 +5,7 @@ import "sweetalert2/dist/sweetalert2.min.css";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { Upload, Image as ImageIcon, PlusCircle, Trash2 } from "lucide-react";
+const testServiceBaseURL = import.meta.env.VITE_TEST_SERVICE_BASE_URL;
 
 export default function AddTest() {
   const [title, setTitle] = useState("");
@@ -112,7 +113,7 @@ export default function AddTest() {
       const authToken = localStorage.getItem("authToken");
 
       await axios.post(
-        `http://localhost:8081/test/add?title=${encodeURIComponent(
+        testServiceBaseURL + `/test/add?title=${encodeURIComponent(
           title
         )}&subject=${encodeURIComponent(
           subject

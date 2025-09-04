@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+const userServiceBaseURL = import.meta.env.VITE_USER_SERVICE_BASE_URL;
 
 function todayLocalDate() {
   const d = new Date();
@@ -54,7 +55,7 @@ export default function AddStudent() {
 
       const token = localStorage.getItem("authToken"); // ⬅️ Get token from localStorage
 
-      const res = await axios.post("http://localhost:8080/student/add", payload, {
+      const res = await axios.post(userServiceBaseURL + "/student/add", payload, {
         headers: {
           Authorization: `${token}`,
         },

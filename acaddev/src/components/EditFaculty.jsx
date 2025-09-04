@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+const userServiceBaseURL = import.meta.env.VITE_USER_SERVICE_BASE_URL;
 
 export default function EditFaculty() {
   const { id } = useParams();
@@ -15,7 +16,7 @@ export default function EditFaculty() {
     const fetchFaculty = async () => {
       try {
         const token = localStorage.getItem("authToken");
-        const response = await fetch(`http://localhost:8080/faculty/${id}`, {
+        const response = await fetch(userServiceBaseURL + `/faculty/${id}`, {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -46,7 +47,7 @@ export default function EditFaculty() {
     e.preventDefault();
     try {
       const token = localStorage.getItem("authToken");
-      const response = await fetch(`http://localhost:8080/faculty/update/${id}`, {
+      const response = await fetch(userServiceBaseURL + `/faculty/update/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

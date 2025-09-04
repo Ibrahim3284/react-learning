@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+const testServiceBaseURL = import.meta.env.VITE_TEST_SERVICE_BASE_URL;
 
 export default function AttemptTest() {
   const { id } = useParams(); // test id
@@ -21,7 +22,7 @@ export default function AttemptTest() {
 
     const token = localStorage.getItem("authToken");
     try {
-      await fetch(`http://localhost:8081/test/save/${id}`, {
+      await fetch(testServiceBaseURL + `/test/save/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -40,7 +41,7 @@ export default function AttemptTest() {
     const token = localStorage.getItem("authToken");
 
     try {
-      const response = await fetch(`http://localhost:8081/test/submit/${id}`, {
+      const response = await fetch(testServiceBaseURL + `/test/submit/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

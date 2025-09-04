@@ -4,6 +4,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
+const userServiceBaseURL = import.meta.env.VITE_USER_SERVICE_BASE_URL;
 
 export default function EditStudent() {
   const { id } = useParams();
@@ -17,7 +18,7 @@ export default function EditStudent() {
     const fetchStudent = async () => {
       try {
         const token = localStorage.getItem("authToken");
-        const response = await fetch(`http://localhost:8080/student/${id}`, {
+        const response = await fetch(userServiceBaseURL + `/student/${id}`, {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -48,7 +49,7 @@ export default function EditStudent() {
     e.preventDefault();
     try {
       const token = localStorage.getItem("authToken");
-      const response = await fetch(`http://localhost:8080/student/update/${id}`, {
+      const response = await fetch(userServiceBaseURL + `/student/update/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+const testServiceBaseURL = import.meta.env.VITE_TEST_SERVICE_BASE_URL;
 
 export default function TestDetails() {
   const { id } = useParams();
@@ -14,7 +15,7 @@ export default function TestDetails() {
     const token = localStorage.getItem("authToken");
 
     axios
-      .get(`http://localhost:8081/test/get/${id}`, {
+      .get(testServiceBaseURL + `/test/get/${id}`, {
         headers: {
           Authorization: `${token}`,
         },
