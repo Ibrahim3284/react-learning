@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+const authServiceBaseURL = import.meta.env.VITE_AUTH_SERVICE_BASE_URL;
 
 export default function Register() {
   const [username, setUsername] = useState("");
@@ -18,7 +19,7 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8087/register", {
+      const response = await fetch(authServiceBaseURL + "/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password, role}),

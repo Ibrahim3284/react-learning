@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+const authServiceBaseURL = import.meta.env.VITE_AUTH_SERVICE_BASE_URL;
 
 export default function FacultyLogin() {
   const [username, setUsername] = useState("");
@@ -18,7 +19,7 @@ export default function FacultyLogin() {
 
     try {
       // Step 1: Verify faculty
-      const isValidFaculty = await fetch("http://localhost:8087/isFaculty", {
+      const isValidFaculty = await fetch(authServiceBaseURL + "/isFaculty", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -34,7 +35,7 @@ export default function FacultyLogin() {
       }
 
       // Step 2: Login and get token
-      const response = await fetch("http://localhost:8087/login", {
+      const response = await fetch(authServiceBaseURL + "/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),

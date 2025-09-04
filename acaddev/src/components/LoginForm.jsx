@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+const authServiceBaseURL = import.meta.env.VITE_AUTH_SERVICE_BASE_URL;
 
 export default function LoginForm() {
   const [username, setUsername] = useState("");
@@ -17,7 +18,7 @@ export default function LoginForm() {
     setLoading(true);
 
     try {
-      const isValidAdmin = await fetch("http://localhost:8087/isAdmin", {
+      const isValidAdmin = await fetch(authServiceBaseURL + "/isAdmin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -30,7 +31,7 @@ export default function LoginForm() {
       } else {
         throw new Error("You are not an admin");
       }
-      const response = await fetch("http://localhost:8087/login", {
+      const response = await fetch(authServiceBaseURL + "/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),

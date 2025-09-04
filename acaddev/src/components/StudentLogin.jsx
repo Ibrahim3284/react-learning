@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+const authServiceBaseURL = import.meta.env.VITE_AUTH_SERVICE_BASE_URL;
 
 export default function StudentLogin() {
   const [username, setUsername] = useState("");
@@ -17,7 +18,7 @@ export default function StudentLogin() {
     setLoading(true);
 
     try {
-      const isValidStudent = await fetch("http://localhost:8087/isStudent", {
+      const isValidStudent = await fetch(authServiceBaseURL + "/isStudent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -30,7 +31,7 @@ export default function StudentLogin() {
       } else {
         throw new Error("You are not a student");
       }
-      const response = await fetch("http://localhost:8087/login", {
+      const response = await fetch(authServiceBaseURL + "/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
