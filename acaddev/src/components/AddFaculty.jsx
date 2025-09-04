@@ -1,10 +1,11 @@
 import { useState } from "react";
 import axios from "axios";
-import Navbar from "./Navbar";
-import Footer from "./Footer";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { FiCheckCircle, FiAlertCircle } from "react-icons/fi";
+import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
+import Navbar from "./Navbar";
+import Footer from "./Footer";
 
 function todayLocalDate() {
   const d = new Date();
@@ -29,9 +30,6 @@ export default function AddFaculty() {
     linkedInProfileURL: "",
   });
 
-  const [message, setMessage] = useState("");
-  const [isError, setIsError] = useState(false);
-
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -42,7 +40,7 @@ export default function AddFaculty() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage("");
+
     try {
       const payload = {
         ...formData,
@@ -53,194 +51,182 @@ export default function AddFaculty() {
           ? formData.dateOfJoining.toISOString().split("T")[0]
           : null,
       };
-      const res = await axios.post("http://localhost:8080/faculty/add", payload);
-      setMessage(res.data || "Faculty added successfully!");
-      setIsError(false);
+
+      const token = localStorage.getItem("authToken");
+
+      const res = await axios.post("http://localhost:8080/faculty/add", payload, {
+        headers: {
+          Authorization: token ? `${token}` : "",
+        },
+        withCredentials: true,
+      });
+
+      Swal.fire({
+        title: "✅ Faculty Added",
+        text: res.data || "Faculty registered successfully.",
+        icon: "success",
+        confirmButtonColor: "#16a34a",
+      });
+
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phoneNo: "",
+        qualification: "",
+        department: "",
+        dateOfBirth: null,
+        dateOfJoining: today,
+        gender: "",
+        isActive: true,
+        linkedInProfileURL: "",
+      });
     } catch (err) {
-      setMessage(err?.response?.data || "Something went wrong!");
-      setIsError(true);
+      console.error(err);
+      Swal.fire({
+        title: "❌ Error",
+        text: err?.response?.data || "Something went wrong!",
+        icon: "error",
+        confirmButtonColor: "#dc2626",
+      });
     }
   };
 
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 pt-24 pb-16 flex items-center justify-center">
-        <div className="bg-white/80 backdrop-blur-md shadow-2xl rounded-3xl p-10 w-full max-w-4xl">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-center text-blue-600 mb-8 tracking-wide drop-shadow-md">
-            Faculty Registration
-          </h1>
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 px-6 py-16">
+        <div className="relative w-full max-w-4xl bg-gray-800 rounded-3xl shadow-2xl border border-gray-700 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-rose-600 via-purple-600 to-blue-500 opacity-10 blur-3xl -z-10"></div>
 
-          {message && (
-            <div
-              className={`flex items-center gap-2 mb-6 p-4 rounded-lg shadow-md border ${
-                isError
-                  ? "bg-red-100 text-red-700 border-red-300"
-                  : "bg-green-100 text-green-700 border-green-300"
-              }`}
-            >
-              {isError ? <FiAlertCircle className="text-red-500 text-xl" /> : <FiCheckCircle className="text-green-500 text-xl" />}
-              <span className="font-medium">{message}</span>
-            </div>
-          )}
+          <div className="p-10">
+            <h2 className="text-4xl font-extrabold text-center text-white mb-12">
+              👨‍🏫 Faculty Registration
+            </h2>
 
-          <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
-            {/* First Name */}
-            <div>
-              <label className="block text-gray-700 font-medium mb-1">First Name</label>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <input
                 type="text"
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                placeholder="First Name"
                 required
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-500"
               />
-            </div>
 
-            {/* Last Name */}
-            <div>
-              <label className="block text-gray-700 font-medium mb-1">Last Name</label>
               <input
                 type="text"
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                placeholder="Last Name"
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-500"
               />
-            </div>
 
-            {/* Email */}
-            <div>
-              <label className="block text-gray-700 font-medium mb-1">Email</label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                placeholder="Email"
                 required
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-500"
               />
-            </div>
 
-            {/* Phone No */}
-            <div>
-              <label className="block text-gray-700 font-medium mb-1">Phone Number</label>
               <input
                 type="text"
                 name="phoneNo"
                 value={formData.phoneNo}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                placeholder="Phone Number"
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-500"
               />
-            </div>
 
-            {/* Qualification */}
-            <div>
-              <label className="block text-gray-700 font-medium mb-1">Qualification</label>
               <input
                 type="text"
                 name="qualification"
                 value={formData.qualification}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                placeholder="Qualification"
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-500"
               />
-            </div>
 
-            {/* Department */}
-            <div>
-              <label className="block text-gray-700 font-medium mb-1">Department</label>
               <input
                 type="text"
                 name="department"
                 value={formData.department}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                placeholder="Department"
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-500"
               />
-            </div>
 
-            {/* Date of Birth */}
-            <div>
-              <label className="block text-gray-700 font-medium mb-1">Date of Birth</label>
               <DatePicker
                 selected={formData.dateOfBirth}
-                onChange={(date) => setFormData(prev => ({ ...prev, dateOfBirth: date }))}
+                onChange={(date) => setFormData((prev) => ({ ...prev, dateOfBirth: date }))}
                 dateFormat="yyyy-MM-dd"
                 showMonthDropdown
                 showYearDropdown
                 dropdownMode="select"
                 maxDate={today}
-                placeholderText="Select Date of Birth"
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                placeholderText="Date of Birth"
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white"
               />
-            </div>
 
-            {/* Date of Joining */}
-            <div>
-              <label className="block text-gray-700 font-medium mb-1">Date of Joining</label>
               <DatePicker
                 selected={formData.dateOfJoining}
-                onChange={(date) => setFormData(prev => ({ ...prev, dateOfJoining: date }))}
+                onChange={(date) => setFormData((prev) => ({ ...prev, dateOfJoining: date }))}
                 dateFormat="yyyy-MM-dd"
                 showMonthDropdown
                 showYearDropdown
                 dropdownMode="select"
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                placeholderText="Date of Joining"
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white"
               />
-              <p className="text-xs text-gray-500 mt-1">Defaults to today.</p>
-            </div>
 
-            {/* Gender */}
-            <div>
-              <label className="block text-gray-700 font-medium mb-1">Gender</label>
               <select
                 name="gender"
                 value={formData.gender}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white focus:ring-2 focus:ring-pink-500"
               >
                 <option value="">Select Gender</option>
                 <option value="MALE">Male</option>
                 <option value="FEMALE">Female</option>
                 <option value="OTHER">Other</option>
               </select>
-            </div>
 
-            {/* LinkedIn Profile */}
-            <div>
-              <label className="block text-gray-700 font-medium mb-1">LinkedIn Profile URL</label>
               <input
                 type="url"
                 name="linkedInProfileURL"
                 value={formData.linkedInProfileURL}
                 onChange={handleChange}
-                placeholder="https://linkedin.com/in/..."
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                placeholder="LinkedIn Profile URL"
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-500"
               />
-            </div>
 
-            {/* Active */}
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                name="isActive"
-                checked={formData.isActive}
-                onChange={handleChange}
-                className="h-5 w-5 text-blue-600 focus:ring-blue-400"
-              />
-              <label className="text-gray-700 font-medium">Active</label>
-            </div>
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  name="isActive"
+                  checked={formData.isActive}
+                  onChange={handleChange}
+                  className="h-5 w-5 text-pink-500"
+                />
+                <label className="text-white">Active</label>
+              </div>
+            </form>
 
-            {/* Submit */}
-            <div className="col-span-2 mt-4">
+            <div className="mt-10 text-center">
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 shadow-lg hover:shadow-xl"
+                onClick={handleSubmit}
+                className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl shadow-md hover:scale-105 transition-transform"
               >
-                Submit Faculty
+                ✅ Submit Faculty
               </button>
             </div>
-          </form>
+          </div>
         </div>
       </div>
       <Footer />
