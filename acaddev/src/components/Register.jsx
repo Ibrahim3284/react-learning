@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+
 const authServiceBaseURL = import.meta.env.VITE_AUTH_SERVICE_BASE_URL;
 
 export default function Register() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // 👁️ Toggle state
+  const [confirmPassword, setConfirmPassword] = useState(""); // ✅ New state
+  const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState("normal_user");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -17,13 +19,19 @@ export default function Register() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const response = await fetch(authServiceBaseURL + "/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password, role }),
+        body: JSON.stringify({ username, password, confirmPassword, role }), // ✅ include confirmPassword
       });
 
       if (!response.ok) {
@@ -47,7 +55,6 @@ export default function Register() {
       <Navbar />
       <div className="min-h-screen flex items-center justify-center bg-gray-900 px-4">
         <div className="relative w-full max-w-md bg-gray-800 rounded-3xl shadow-2xl overflow-hidden border border-gray-700">
-          {/* Decorative glow */}
           <div className="absolute inset-0 bg-gradient-to-br from-red-600 via-purple-600 to-pink-500 opacity-10 blur-3xl -z-10"></div>
 
           <div className="p-10">
@@ -60,6 +67,7 @@ export default function Register() {
             )}
 
             <form className="space-y-6" onSubmit={handleLogin}>
+              {/* Username */}
               <div>
                 <input
                   type="text"
@@ -71,7 +79,7 @@ export default function Register() {
                 />
               </div>
 
-              {/* Password input with toggle */}
+              {/* Password */}
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -88,6 +96,18 @@ export default function Register() {
                 >
                   {showPassword ? "🙈" : "👁️"}
                 </button>
+              </div>
+
+              {/* Confirm Password */}
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-5 py-3 pr-12 bg-gray-700 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-white placeholder-gray-400 transition"
+                  required
+                />
               </div>
 
               <button

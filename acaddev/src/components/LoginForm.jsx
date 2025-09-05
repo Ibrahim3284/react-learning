@@ -116,7 +116,10 @@ export default function LoginForm() {
 
             <div className="mt-6 text-center text-gray-400 text-sm">
               Forgot your password?{" "}
-              <span className="text-pink-400 underline cursor-pointer">
+              <span
+                className="text-pink-400 underline cursor-pointer"
+                onClick={() => navigate("/forgotPassword")}
+              >
                 Reset here
               </span>
             </div>

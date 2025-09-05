@@ -115,12 +115,15 @@ export default function FacultyLogin() {
               </button>
             </form>
 
-            <div className="mt-6 text-center text-gray-400 text-sm">
-              Forgot your password?{" "}
-              <span className="text-blue-400 underline cursor-pointer">
-                Reset here
-              </span>
-            </div>
+           <div className="mt-6 text-center text-gray-400 text-sm">
+             Forgot your password?{" "}
+             <span
+               className="text-pink-400 underline cursor-pointer"
+               onClick={() => navigate("/forgotPassword")}
+             >
+               Reset here
+             </span>
+           </div>
           </div>
         </div>
       </div>
