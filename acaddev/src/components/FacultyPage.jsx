@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import { FilePlus2, ListChecks, GraduationCap } from "lucide-react"; // ✅ icons
+import { FilePlus2, ListChecks, GraduationCap, FileText, List } from "lucide-react"; // ⬅️ Added new icons
+
 const userServiceBaseURL = import.meta.env.VITE_USER_SERVICE_BASE_URL;
 
 export default function FacultyPage() {
@@ -55,7 +56,7 @@ export default function FacultyPage() {
         </div>
 
         {/* Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {/* Add Test */}
           <button
             onClick={() => navigate("/addTest")}
@@ -65,12 +66,21 @@ export default function FacultyPage() {
             Add Test
           </button>
 
-          {/* List Tests */}
+          {/* Add Test Details */}
           <button
-            onClick={() => navigate("/listTests")}
+            onClick={() => navigate("/addTestDetails")}
             className="bg-gray-800 hover:bg-gray-700 transition duration-300 shadow-lg rounded-2xl p-8 flex flex-col items-center justify-center text-blue-300 font-bold text-lg hover:scale-105 transform"
           >
-            <ListChecks className="h-10 w-10 text-yellow-400 mb-4" />
+            <FileText className="h-10 w-10 text-indigo-400 mb-4" />
+            Add Test Details
+          </button>
+
+          {/* List Test Details */}
+          <button
+            onClick={() => navigate("/listTestDetails")}
+            className="bg-gray-800 hover:bg-gray-700 transition duration-300 shadow-lg rounded-2xl p-8 flex flex-col items-center justify-center text-blue-300 font-bold text-lg hover:scale-105 transform"
+          >
+            <List className="h-10 w-10 text-orange-400 mb-4" />
             List Tests
           </button>
         </div>

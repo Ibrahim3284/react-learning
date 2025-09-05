@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+const authServiceBaseURL = import.meta.env.VITE_AUTH_SERVICE_BASE_URL;
 
 export default function ResetPassword() {
   const location = useLocation();
@@ -27,7 +28,7 @@ export default function ResetPassword() {
 
     try {
       const response = await fetch(
-        `http://localhost:8087/reset-password?otp=${encodeURIComponent(otp)}`,
+        authServiceBaseURL + `/reset-password?otp=${encodeURIComponent(otp)}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

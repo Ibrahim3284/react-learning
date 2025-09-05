@@ -1,188 +1,240 @@
 import React, { useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+
 const testServiceBaseURL = import.meta.env.VITE_TEST_SERVICE_BASE_URL;
 
 export default function AttemptTest() {
-  const { id } = useParams(); // test id
   const location = useLocation();
-  const { questions } = location.state || { questions: [] };
+  const navigate = useNavigate();
 
-  const [answers, setAnswers] = useState([]);
-  const [submitting, setSubmitting] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const { questionsBySubject, title, date } = location.state || {};
 
-  const handleSelect = async (questionId, option) => {
-    const updatedAnswers = [
-      ...answers.filter((ans) => ans.questionId !== questionId),
-      { questionId, optionSelected: option },
-    ];
-    setAnswers(updatedAnswers);
+  if (!questionsBySubject) {
+    navigate("/");
+    return null;
+  }
 
+  const subjects = Object.keys(questionsBySubject);
+  const [selectedSubject, setSelectedSubject] = useState(subjects[0]);
+
+  // Track current question index within selected subject
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+
+  // Answers stored as { [questionId]: optionSelected }
+  const [answers, setAnswers] = useState({});
+
+  const questions = questionsBySubject[selectedSubject] || [];
+
+  // Save API call for one question
+  const saveAnswer = async (questionId, optionSelected) => {
     const token = localStorage.getItem("authToken");
+    const titleEncoded = encodeURIComponent(title);
+    const dateEncoded = encodeURIComponent(date);
+
+    const payload = [
+      {
+        questionId,
+        optionSelected,
+      },
+    ];
+
     try {
-      await fetch(testServiceBaseURL + `/test/save/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `${token}`,
-        },
-        body: JSON.stringify(updatedAnswers),
-      });
-      console.log("Answers saved:", updatedAnswers);
+      const res = await fetch(
+        `${testServiceBaseURL}/test/save?title=${titleEncoded}&date=${dateEncoded}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "Failed to save answer");
+      }
     } catch (error) {
-      console.error("Error saving answers:", error);
+      alert(`Error saving answer: ${error.message}`);
     }
   };
 
-  const handleSubmit = async () => {
-    setSubmitting(true);
+  // Handle option selection
+  const handleOptionSelect = (questionId, optionIndex) => {
+    const optionSelected = String.fromCharCode(97 + optionIndex);
+
+    setAnswers((prev) => ({
+      ...prev,
+      [questionId]: optionSelected,
+    }));
+
+    saveAnswer(questionId, optionSelected);
+  };
+
+  // Submit API call for all answers
+  const submitTest = async () => {
     const token = localStorage.getItem("authToken");
+    const titleEncoded = encodeURIComponent(title);
+    const dateEncoded = encodeURIComponent(date);
+
+    const payload = Object.entries(answers).map(([questionId, optionSelected]) => ({
+      questionId: Number(questionId),
+      optionSelected,
+    }));
+
+    if (payload.length === 0) {
+      alert("No answers selected to submit!");
+      return;
+    }
 
     try {
-      const response = await fetch(testServiceBaseURL + `/test/submit/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `${token}`,
-        },
-        body: JSON.stringify(answers),
-      });
+      const res = await fetch(
+        `${testServiceBaseURL}/test/submit?title=${titleEncoded}&date=${dateEncoded}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
-      if (!response.ok) {
-        throw new Error(`Submit failed with status ${response.status}`);
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "Failed to submit test");
       }
 
-      console.log("Test submitted successfully!");
-      alert("✅ Test submitted successfully!");
+      alert("Test submitted successfully!");
+      navigate("/");
     } catch (error) {
-      console.error("Error submitting test:", error);
-      alert("❌ Failed to submit test. Please try again.");
-    } finally {
-      setSubmitting(false);
+      alert(`Error submitting test: ${error.message}`);
     }
   };
 
-  const handleNext = () => {
-    if (currentIndex < questions.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    }
+  // When user switches subject, reset current question index
+  const onSelectSubject = (subject) => {
+    setSelectedSubject(subject);
+    setCurrentQuestionIndex(0);
   };
 
-  const handlePrev = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    }
-  };
-
-  const currentQuestion = questions[currentIndex];
+  // Current question object
+  const currentQuestion = questions[currentQuestionIndex];
 
   return (
     <>
       <Navbar />
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 px-6 py-12">
-        <div className="relative w-full max-w-4xl bg-gray-800 rounded-3xl shadow-2xl border border-gray-700 overflow-hidden">
-          {/* Gradient Glow Background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-pink-600 to-red-500 opacity-10 blur-3xl -z-10"></div>
+      <div className="min-h-screen bg-gray-900 text-white p-6 flex flex-col items-center justify-center">
+        <div className="max-w-3xl w-full bg-gray-800 rounded-xl shadow-lg p-8 flex flex-col">
+          <h1 className="text-4xl font-bold mb-6 text-center">
+            Attempt Test: {title} ({date})
+          </h1>
 
-          <div className="p-10">
-            <h1 className="text-3xl font-extrabold text-center text-white mb-10">
-              📝 Attempt Test (ID: {id})
-            </h1>
+          {/* Subject Tabs */}
+          <div className="mb-6 flex space-x-4 overflow-x-auto justify-center">
+            {subjects.map((subject) => (
+              <button
+                key={subject}
+                onClick={() => onSelectSubject(subject)}
+                className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap ${
+                  selectedSubject === subject
+                    ? "bg-indigo-600 text-white shadow-lg"
+                    : "bg-gray-700 hover:bg-gray-600"
+                }`}
+              >
+                {subject}
+              </button>
+            ))}
+          </div>
 
-            {questions.length === 0 ? (
-              <p className="text-gray-400 text-center">
-                No questions received.
-              </p>
-            ) : (
-              <>
-                <div className="border border-gray-600 rounded-2xl p-6 bg-gray-700 shadow-md">
-                  <h2 className="text-lg font-semibold text-purple-300 mb-4">
-                    Question {currentIndex + 1} of {questions.length}
-                  </h2>
+          {/* Current Question */}
+          {currentQuestion ? (
+            <div className="flex flex-col items-center text-center p-6 bg-gray-700 rounded-lg shadow-md">
+              <h3 className="text-2xl font-semibold mb-4">
+                {currentQuestion.questionTitle}
+              </h3>
 
-                  {/* Question Title */}
-                  {currentQuestion?.questionTitle && (
-                    <p className="text-gray-100 text-base font-medium mb-4">
-                      {currentQuestion.questionTitle}
-                    </p>
-                  )}
+              {currentQuestion.hasImage && currentQuestion.questionImageData && (
+                <img
+                  src={`data:${currentQuestion.questionImageType};base64,${currentQuestion.questionImageData}`}
+                  alt="Question"
+                  className="mb-6 max-w-full rounded"
+                />
+              )}
 
-                  {/* Question Image */}
-                  {(currentQuestion?.questionImageData ||
-                    currentQuestion?.question) && (
-                    <img
-                      src={
-                        currentQuestion?.questionImageData
-                          ? `data:${
-                              currentQuestion?.questionImageType || "image/png"
-                            };base64,${currentQuestion.questionImageData}`
-                          : `data:image/png;base64,${currentQuestion.question}`
-                      }
-                      alt="Question"
-                      className="w-full max-h-[400px] object-contain rounded-lg border border-gray-600 mb-4 shadow"
-                    />
-                  )}
+              <ul className="list-none space-y-3 w-full max-w-md">
+                {[currentQuestion.option1, currentQuestion.option2, currentQuestion.option3, currentQuestion.option4].map(
+                  (opt, i) => {
+                    if (!opt) return null;
 
-                  {/* Options */}
-                  <div className="space-y-3">
-                    {["option1", "option2", "option3", "option4"].map((opt) => (
-                      <label
-                        key={opt}
-                        className="flex items-center space-x-3 p-3 bg-gray-800 border border-gray-600 rounded-xl shadow hover:bg-gray-600 cursor-pointer transition"
+                    const optionLetter = String.fromCharCode(97 + i); // a,b,c,d
+                    const isSelected = answers[currentQuestion.id] === optionLetter;
+
+                    return (
+                      <li
+                        key={i}
+                        className={`cursor-pointer rounded px-4 py-2 border ${
+                          isSelected
+                            ? "bg-indigo-500 border-indigo-400 text-white font-semibold"
+                            : "border-gray-600 text-gray-300 hover:bg-gray-600"
+                        }`}
+                        onClick={() => handleOptionSelect(currentQuestion.id, i)}
                       >
-                        <input
-                          type="radio"
-                          name={`question-${currentQuestion.id}`}
-                          value={currentQuestion[opt]}
-                          checked={
-                            answers.find(
-                              (a) => a.questionId === currentQuestion.id
-                            )?.optionSelected === currentQuestion[opt]
-                          }
-                          onChange={() =>
-                            handleSelect(currentQuestion.id, currentQuestion[opt])
-                          }
-                          className="h-4 w-4 text-pink-500 focus:ring-pink-500"
-                        />
-                        <span className="text-gray-200">
-                          {currentQuestion[opt]}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
+                        <span className="mr-3 font-bold uppercase">{optionLetter}.</span> {opt}
+                      </li>
+                    );
+                  }
+                )}
+              </ul>
+            </div>
+          ) : (
+            <p className="text-center text-gray-400 mt-6">No questions available.</p>
+          )}
 
-                {/* Navigation Buttons */}
-                <div className="flex justify-between mt-10">
-                  <button
-                    onClick={handlePrev}
-                    disabled={currentIndex === 0}
-                    className="px-6 py-3 bg-gray-600 text-white rounded-xl shadow-md hover:bg-gray-500 disabled:opacity-50 transition"
-                  >
-                    ⬅ Previous
-                  </button>
+          {/* Navigation Buttons */}
+          <div className="flex justify-between mt-8 max-w-md mx-auto w-full">
+            <button
+              onClick={() =>
+                setCurrentQuestionIndex((idx) => Math.max(0, idx - 1))
+              }
+              disabled={currentQuestionIndex === 0}
+              className={`px-6 py-3 rounded-lg font-semibold transition ${
+                currentQuestionIndex === 0
+                  ? "bg-gray-600 cursor-not-allowed text-gray-400"
+                  : "bg-indigo-600 hover:bg-indigo-700 text-white"
+              }`}
+            >
+              Previous
+            </button>
 
-                  {currentIndex < questions.length - 1 ? (
-                    <button
-                      onClick={handleNext}
-                      className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl shadow-md hover:scale-105 transition-transform"
-                    >
-                      Next ➡
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleSubmit}
-                      disabled={submitting}
-                      className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl shadow-md hover:scale-105 transition-transform disabled:opacity-50"
-                    >
-                      {submitting ? "Submitting..." : "✅ Submit Test"}
-                    </button>
-                  )}
-                </div>
-              </>
-            )}
+            <button
+              onClick={() =>
+                setCurrentQuestionIndex((idx) =>
+                  Math.min(questions.length - 1, idx + 1)
+                )
+              }
+              disabled={currentQuestionIndex === questions.length - 1}
+              className={`px-6 py-3 rounded-lg font-semibold transition ${
+                currentQuestionIndex === questions.length - 1
+                  ? "bg-gray-600 cursor-not-allowed text-gray-400"
+                  : "bg-indigo-600 hover:bg-indigo-700 text-white"
+              }`}
+            >
+              Next
+            </button>
+          </div>
+
+          {/* Submit Button */}
+          <div className="text-center mt-10">
+            <button
+              onClick={submitTest}
+              className="px-8 py-3 bg-green-600 rounded-lg font-bold hover:bg-green-700 transition"
+            >
+              Submit Test
+            </button>
           </div>
         </div>
       </div>

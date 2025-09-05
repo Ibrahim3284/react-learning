@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+const authServiceBaseURL = import.meta.env.VITE_AUTH_SERVICE_BASE_URL;
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -17,7 +18,7 @@ export default function ForgotPassword() {
 
     try {
       const response = await fetch(
-        `http://localhost:8087/forgot-password?email=${encodeURIComponent(email)}`,
+        authServiceBaseURL + `/forgot-password?email=${encodeURIComponent(email)}`,
         {
           method: "POST",
         }

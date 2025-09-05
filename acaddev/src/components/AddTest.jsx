@@ -5,6 +5,7 @@ import "sweetalert2/dist/sweetalert2.min.css";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { Upload, Image as ImageIcon, PlusCircle, Trash2 } from "lucide-react";
+
 const testServiceBaseURL = import.meta.env.VITE_TEST_SERVICE_BASE_URL;
 
 export default function AddTest() {
@@ -27,19 +28,6 @@ export default function AddTest() {
     },
   ]);
   const [images, setImages] = useState([null]);
-
-  // ✅ Format to yyyy-MM-dd HH:mm:ss.SSS
-  const formatDateTime = (dateTimeValue) => {
-    if (!dateTimeValue) return "";
-    const date = new Date(dateTimeValue);
-    const yyyy = date.getFullYear();
-    const MM = String(date.getMonth() + 1).padStart(2, "0");
-    const dd = String(date.getDate()).padStart(2, "0");
-    const HH = String(date.getHours()).padStart(2, "0");
-    const mm = String(date.getMinutes()).padStart(2, "0");
-    const ss = String(date.getSeconds()).padStart(2, "0");
-    return `${yyyy}-${MM}-${dd} ${HH}:${mm}:${ss}.000`;
-  };
 
   const handleQuestionChange = (index, field, value) => {
     const updated = [...questions];
@@ -85,7 +73,6 @@ export default function AddTest() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // validation: at least question text or image
     for (let i = 0; i < questions.length; i++) {
       if (!questions[i].questionTitle && !images[i]) {
         Swal.fire({
@@ -99,34 +86,44 @@ export default function AddTest() {
     }
 
     try {
+      const formattedDate = startTime.split("T")[0]; // yyyy-MM-dd
+      const authToken = localStorage.getItem("authToken");
+
+      const formattedQuestions = questions.map((q, index) => ({
+        questionTitle: q.questionTitle,
+        option1: q.option1,
+        option2: q.option2,
+        option3: q.option3,
+        option4: q.option4,
+        rightOption: q.rightOption,
+        category: q.category,
+        difficultyLevel: q.difficulty,
+        hasImage: !!images[index],
+      }));
+
       const formData = new FormData();
       formData.append(
-        "questionList",
-        new Blob([JSON.stringify(questions)], { type: "application/json" })
+        "questions",
+        new Blob([JSON.stringify(formattedQuestions)], {
+          type: "application/json",
+        })
       );
 
       images.forEach((file) => {
-        if (file) formData.append("imageFiles", file);
+        if (file) formData.append("images", file);
       });
 
-      const formattedStartTime = formatDateTime(startTime);
-      const authToken = localStorage.getItem("authToken");
-
       await axios.post(
-        testServiceBaseURL + `/test/add?title=${encodeURIComponent(
+        `${testServiceBaseURL}/test/add?title=${encodeURIComponent(
           title
-        )}&subject=${encodeURIComponent(
+        )}&date=${encodeURIComponent(formattedDate)}&subject=${encodeURIComponent(
           subject
-        )}&start_time=${encodeURIComponent(
-          formattedStartTime
-        )}&duration=${encodeURIComponent(
-          duration * 60
-        )}&test_window=${encodeURIComponent(testWindow * 60)}`,
+        )}`,
         formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
             Authorization: authToken || "",
+            "Content-Type": "multipart/form-data",
           },
           withCredentials: true,
         }
@@ -139,6 +136,27 @@ export default function AddTest() {
         confirmButtonColor: "#16a34a",
         confirmButtonText: "Awesome 🚀",
       });
+
+      // Reset form
+      setTitle("");
+      setSubject("");
+      setStartTime("");
+      setDuration("");
+      setTestWindow("");
+      setQuestions([
+        {
+          questionTitle: "",
+          option1: "",
+          option2: "",
+          option3: "",
+          option4: "",
+          rightOption: "",
+          category: "",
+          difficulty: "",
+          hasImage: false,
+        },
+      ]);
+      setImages([null]);
     } catch (error) {
       console.error("❌ Error:", error);
       Swal.fire({
@@ -171,7 +189,7 @@ export default function AddTest() {
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Test Title"
                   required
-                  className="w-full px-5 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 text-white placeholder-gray-400"
+                  className="w-full px-5 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white"
                 />
                 <input
                   type="text"
@@ -179,34 +197,18 @@ export default function AddTest() {
                   onChange={(e) => setSubject(e.target.value)}
                   placeholder="Subject"
                   required
-                  className="w-full px-5 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 text-white placeholder-gray-400"
+                  className="w-full px-5 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white"
                 />
               </div>
 
-              {/* Start Time & Duration & Test Window */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Date Only */}
+              <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                 <input
-                  type="datetime-local"
+                  type="date"
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
                   required
-                  className="w-full px-5 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
-                />
-                <input
-                  type="number"
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                  placeholder="Duration (minutes)"
-                  required
-                  className="w-full px-5 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-gray-400"
-                />
-                <input
-                  type="number"
-                  value={testWindow}
-                  onChange={(e) => setTestWindow(e.target.value)}
-                  placeholder="Test Window (minutes)"
-                  required
-                  className="w-full px-5 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-gray-400"
+                  className="w-full px-5 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white"
                 />
               </div>
 
@@ -256,7 +258,7 @@ export default function AddTest() {
 
                   <input
                     type="text"
-                    placeholder="Correct Answer"
+                    placeholder="Correct Answer (e.g., option3)"
                     value={q.rightOption}
                     onChange={(e) =>
                       handleQuestionChange(i, "rightOption", e.target.value)
@@ -272,7 +274,7 @@ export default function AddTest() {
                       onChange={(e) =>
                         handleQuestionChange(i, "category", e.target.value)
                       }
-                      className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl text-white placeholder-gray-400"
                     />
                     <input
                       type="text"
@@ -281,7 +283,7 @@ export default function AddTest() {
                       onChange={(e) =>
                         handleQuestionChange(i, "difficulty", e.target.value)
                       }
-                      className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl text-white placeholder-gray-400"
                     />
                   </div>
 

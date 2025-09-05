@@ -3,19 +3,20 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // 👈 Add this
 
 const testServiceBaseURL = import.meta.env.VITE_TEST_SERVICE_BASE_URL;
 
-export default function AllTests() {
-  const [tests, setTests] = useState([]);
+export default function ListTestDetails() {
+  const [testDetails, setTestDetails] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // 👈 Add this
 
-  const fetchTests = async () => {
+  const fetchTestDetails = async () => {
     setLoading(true);
     setError("");
+
     try {
       const token = localStorage.getItem("authToken");
       if (!token) throw new Error("Unauthorized. Please login first.");
@@ -30,11 +31,11 @@ export default function AllTests() {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch tests. Status: ${response.status}`);
+        throw new Error(`Failed to fetch. Status: ${response.status}`);
       }
 
       const data = await response.json();
-      setTests(data);
+      setTestDetails(data);
     } catch (err) {
       setError(err.message);
       console.error(err);
@@ -44,49 +45,8 @@ export default function AllTests() {
   };
 
   useEffect(() => {
-    fetchTests();
+    fetchTestDetails();
   }, []);
-
-  // Attempt test API call + navigation
-  const handleAttempt = async (test) => {
-    try {
-      const token = localStorage.getItem("authToken");
-      if (!token) throw new Error("Unauthorized. Please login first.");
-
-      const titleEncoded = encodeURIComponent(test.title);
-      const date = test.date?.split("T")[0];
-      const dateEncoded = encodeURIComponent(date);
-
-      const res = await fetch(
-        `${testServiceBaseURL}/test/attempt?title=${titleEncoded}&date=${dateEncoded}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token,
-          },
-        }
-      );
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(errorText || "Failed to attempt test");
-      }
-
-      const data = await res.json();
-
-      // Navigate passing data in state
-      navigate("/attemptTest", {
-        state: { questionsBySubject: data, title: test.title, date },
-      });
-    } catch (err) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: err.message,
-      });
-    }
-  };
 
   return (
     <>
@@ -97,22 +57,15 @@ export default function AllTests() {
 
           <div className="p-10">
             <h2 className="text-4xl font-extrabold text-center text-white mb-12">
-              📚 Available Tests
+              📋 Test Details List
             </h2>
 
-            {loading && (
-              <p className="text-center text-white text-lg">Loading tests...</p>
-            )}
-
+            {loading && <p className="text-center text-white">Loading test details...</p>}
             {error && (
-              <p className="text-center text-red-400 font-semibold">{error}</p>
+              <p className="text-center text-red-400 font-semibold">Error: {error}</p>
             )}
 
-            {!loading && !error && tests.length === 0 && (
-              <p className="text-center text-gray-400 mt-6">No tests found.</p>
-            )}
-
-            {!loading && !error && tests.length > 0 && (
+            {!loading && testDetails.length > 0 && (
               <div className="overflow-x-auto rounded-xl border border-gray-600 shadow-md">
                 <table className="min-w-full text-sm text-left text-white bg-gray-800">
                   <thead className="bg-gray-700 text-xs uppercase">
@@ -124,7 +77,7 @@ export default function AllTests() {
                         "Start Time",
                         "Duration (min)",
                         "Test Window (min)",
-                        "Attempt",
+                        "Actions",
                       ].map((header) => (
                         <th key={header} className="px-6 py-3 font-semibold">
                           {header}
@@ -133,12 +86,12 @@ export default function AllTests() {
                     </tr>
                   </thead>
                   <tbody>
-                    {tests.map((test, i) => (
+                    {testDetails.map((test, i) => (
                       <tr
                         key={test.id}
                         className={`${
                           i % 2 === 0 ? "bg-gray-800" : "bg-gray-900"
-                        } hover:bg-gray-700 transition cursor-pointer`}
+                        } hover:bg-gray-700 transition`}
                       >
                         <td className="px-6 py-3">{test.id}</td>
                         <td className="px-6 py-3">{test.title}</td>
@@ -158,10 +111,18 @@ export default function AllTests() {
                         <td className="px-6 py-3">{test.testWindow}</td>
                         <td className="px-6 py-3">
                           <button
-                            onClick={() => handleAttempt(test)}
-                            className="bg-green-600 hover:bg-green-700 text-white py-2 px-5 rounded-lg font-semibold shadow"
+                            onClick={() =>
+                              navigate(
+                                `/viewQuestions?title=${encodeURIComponent(
+                                  test.title
+                                )}&date=${encodeURIComponent(
+                                  test.date?.split("T")[0]
+                                )}`
+                              )
+                            }
+                            className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded"
                           >
-                            Attempt
+                            View
                           </button>
                         </td>
                       </tr>
@@ -169,6 +130,10 @@ export default function AllTests() {
                   </tbody>
                 </table>
               </div>
+            )}
+
+            {!loading && testDetails.length === 0 && !error && (
+              <p className="text-center text-gray-400 mt-6">No test details found.</p>
             )}
           </div>
         </div>
