@@ -7,6 +7,7 @@ const authServiceBaseURL = import.meta.env.VITE_AUTH_SERVICE_BASE_URL;
 export default function Register() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // 👁️ Toggle state
   const [role, setRole] = useState("normal_user");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,7 +23,7 @@ export default function Register() {
       const response = await fetch(authServiceBaseURL + "/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password, role}),
+        body: JSON.stringify({ username, password, role }),
       });
 
       if (!response.ok) {
@@ -70,15 +71,23 @@ export default function Register() {
                 />
               </div>
 
-              <div>
+              {/* Password input with toggle */}
+              <div className="relative">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-5 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-white placeholder-gray-400 transition"
+                  className="w-full px-5 py-3 pr-12 bg-gray-700 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-white placeholder-gray-400 transition"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute top-1/2 right-4 transform -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none"
+                >
+                  {showPassword ? "🙈" : "👁️"}
+                </button>
               </div>
 
               <button
@@ -86,7 +95,7 @@ export default function Register() {
                 disabled={loading}
                 className="w-full py-3 bg-gradient-to-r from-pink-500 via-red-500 to-purple-500 text-white font-semibold rounded-xl shadow-lg hover:scale-105 transition-transform duration-300"
               >
-                {loading ? "Registering... " : "Register"}
+                {loading ? "Registering..." : "Register"}
               </button>
             </form>
           </div>

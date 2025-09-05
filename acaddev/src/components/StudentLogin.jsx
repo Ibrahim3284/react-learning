@@ -7,6 +7,7 @@ const authServiceBaseURL = import.meta.env.VITE_AUTH_SERVICE_BASE_URL;
 export default function StudentLogin() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // 👈 New state
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -22,15 +23,16 @@ export default function StudentLogin() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
-      })
-      if(isValidStudent.ok){
-        const responseVal = await isValidStudent.json()
-        if(responseVal == false) {
+      });
+      if (isValidStudent.ok) {
+        const responseVal = await isValidStudent.json();
+        if (responseVal == false) {
           throw new Error("You are not a student");
         }
       } else {
         throw new Error("You are not a student");
       }
+
       const response = await fetch(authServiceBaseURL + "/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -67,7 +69,9 @@ export default function StudentLogin() {
             </h2>
 
             {error && (
-              <p className="text-red-500 text-center mb-4 font-medium">{error}</p>
+              <p className="text-red-500 text-center mb-4 font-medium">
+                {error}
+              </p>
             )}
 
             <form className="space-y-6" onSubmit={handleLogin}>
@@ -82,15 +86,23 @@ export default function StudentLogin() {
                 />
               </div>
 
-              <div>
+              {/* Password Input with View Button */}
+              <div className="relative">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-5 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-white placeholder-gray-400 transition"
+                  className="w-full px-5 py-3 pr-12 bg-gray-700 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-white placeholder-gray-400 transition"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute top-1/2 right-4 transform -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none"
+                >
+                  {showPassword ? "🙈" : "👁️"}
+                </button>
               </div>
 
               <button
