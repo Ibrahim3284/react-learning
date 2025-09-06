@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
 
 const testServiceBaseURL = import.meta.env.VITE_TEST_SERVICE_BASE_URL;
 
@@ -11,34 +13,120 @@ export default function AttemptTest() {
 
   const { questionsBySubject, title, date } = location.state || {};
 
-  if (!questionsBySubject) {
-    navigate("/");
-    return null;
-  }
+  // Redirect if no data
+  useEffect(() => {
+    if (!questionsBySubject) {
+      navigate("/");
+    }
+  }, [questionsBySubject, navigate]);
+
+  if (!questionsBySubject) return null;
 
   const subjects = Object.keys(questionsBySubject);
-  const [selectedSubject, setSelectedSubject] = useState(subjects[0]);
+  const savedSubject = localStorage.getItem("attemptTest_selectedSubject");
+  const initialSubject =
+    savedSubject && subjects.includes(savedSubject) ? savedSubject : subjects[0];
+  const [selectedSubject, setSelectedSubject] = useState(initialSubject);
 
-  // Track current question index within selected subject
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const getSavedIndex = (subject) => {
+    const saved = localStorage.getItem(`attemptTest_currentQuestionIndex_${subject}`);
+    const parsed = parseInt(saved, 10);
+    if (!isNaN(parsed) && parsed >= 0 && parsed < (questionsBySubject[subject]?.length || 0)) {
+      return parsed;
+    }
+    return 0;
+  };
 
-  // Answers stored as { [questionId]: optionSelected }
-  const [answers, setAnswers] = useState({});
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(
+    getSavedIndex(initialSubject)
+  );
 
-  const questions = questionsBySubject[selectedSubject] || [];
+  const savedAnswers = localStorage.getItem("attemptTest_answers");
+  const [answers, setAnswers] = useState(savedAnswers ? JSON.parse(savedAnswers) : {});
 
-  // Save API call for one question
+  // Update current question index when subject changes
+  useEffect(() => {
+    const index = getSavedIndex(selectedSubject);
+    setCurrentQuestionIndex(index);
+    localStorage.setItem("attemptTest_selectedSubject", selectedSubject);
+  }, [selectedSubject]);
+
+  // Save question index per subject
+  useEffect(() => {
+    if (selectedSubject) {
+      localStorage.setItem(
+        `attemptTest_currentQuestionIndex_${selectedSubject}`,
+        currentQuestionIndex.toString()
+      );
+    }
+  }, [currentQuestionIndex, selectedSubject]);
+
+  // Save answers in local storage
+  useEffect(() => {
+    localStorage.setItem("attemptTest_answers", JSON.stringify(answers));
+  }, [answers]);
+
+  // Fetch saved responses on mount
+  useEffect(() => {
+    const fetchSavedResponses = async () => {
+      const token = localStorage.getItem("authToken");
+      if (!token) return;
+
+      const titleEncoded = encodeURIComponent(title);
+      const dateEncoded = encodeURIComponent(date);
+
+      try {
+        const res = await fetch(
+          `${testServiceBaseURL}/test/responses?title=${titleEncoded}&date=${dateEncoded}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: token,
+            },
+          }
+        );
+
+        if (!res.ok) return;
+
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          const formatted = {};
+          for (const { questionId, optionSelected } of data) {
+            if (questionId && optionSelected) {
+              formatted[questionId] = optionSelected.toLowerCase();
+            }
+          }
+
+          setAnswers((prev) => {
+            const merged = { ...prev, ...formatted };
+            localStorage.setItem("attemptTest_answers", JSON.stringify(merged));
+            return merged;
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching saved responses:", err);
+      }
+    };
+
+    fetchSavedResponses();
+  }, [title, date]);
+
   const saveAnswer = async (questionId, optionSelected) => {
     const token = localStorage.getItem("authToken");
+    if (!token) return;
+
     const titleEncoded = encodeURIComponent(title);
     const dateEncoded = encodeURIComponent(date);
 
-    const payload = [
-      {
-        questionId,
-        optionSelected,
-      },
-    ];
+    const updatedAnswers = {
+      ...answers,
+      [questionId]: optionSelected,
+    };
+
+    const payload = Object.entries(updatedAnswers).map(([id, option]) => ({
+      questionId: Number(id),
+      optionSelected: option,
+    }));
 
     try {
       const res = await fetch(
@@ -57,26 +145,25 @@ export default function AttemptTest() {
         const errorText = await res.text();
         throw new Error(errorText || "Failed to save answer");
       }
+
+      setAnswers(updatedAnswers);
     } catch (error) {
-      alert(`Error saving answer: ${error.message}`);
+      Swal.fire("Error", `Error saving answer: ${error.message}`, "error");
     }
   };
 
-  // Handle option selection
   const handleOptionSelect = (questionId, optionIndex) => {
-    const optionSelected = String.fromCharCode(97 + optionIndex);
-
-    setAnswers((prev) => ({
-      ...prev,
-      [questionId]: optionSelected,
-    }));
-
+    const optionSelected = String.fromCharCode(97 + optionIndex); // a, b, c, d
     saveAnswer(questionId, optionSelected);
   };
 
-  // Submit API call for all answers
   const submitTest = async () => {
     const token = localStorage.getItem("authToken");
+    if (!token) {
+      Swal.fire("Unauthorized", "You must be logged in to submit the test.", "error");
+      return;
+    }
+
     const titleEncoded = encodeURIComponent(title);
     const dateEncoded = encodeURIComponent(date);
 
@@ -86,7 +173,7 @@ export default function AttemptTest() {
     }));
 
     if (payload.length === 0) {
-      alert("No answers selected to submit!");
+      Swal.fire("No Answers", "No answers selected to submit!", "warning");
       return;
     }
 
@@ -108,20 +195,22 @@ export default function AttemptTest() {
         throw new Error(errorText || "Failed to submit test");
       }
 
-      alert("Test submitted successfully!");
+      await Swal.fire("Success", "Test submitted successfully!", "success");
+
+      // Cleanup localStorage
+      localStorage.removeItem("attemptTest_answers");
+      subjects.forEach((subject) => {
+        localStorage.removeItem(`attemptTest_currentQuestionIndex_${subject}`);
+      });
+      localStorage.removeItem("attemptTest_selectedSubject");
+
       navigate("/");
     } catch (error) {
-      alert(`Error submitting test: ${error.message}`);
+      Swal.fire("Error", `Error submitting test: ${error.message}`, "error");
     }
   };
 
-  // When user switches subject, reset current question index
-  const onSelectSubject = (subject) => {
-    setSelectedSubject(subject);
-    setCurrentQuestionIndex(0);
-  };
-
-  // Current question object
+  const questions = questionsBySubject[selectedSubject] || [];
   const currentQuestion = questions[currentQuestionIndex];
 
   return (
@@ -138,7 +227,7 @@ export default function AttemptTest() {
             {subjects.map((subject) => (
               <button
                 key={subject}
-                onClick={() => onSelectSubject(subject)}
+                onClick={() => setSelectedSubject(subject)}
                 className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap ${
                   selectedSubject === subject
                     ? "bg-indigo-600 text-white shadow-lg"
@@ -150,27 +239,39 @@ export default function AttemptTest() {
             ))}
           </div>
 
-          {/* Current Question */}
+          {/* Question Block */}
           {currentQuestion ? (
             <div className="flex flex-col items-center text-center p-6 bg-gray-700 rounded-lg shadow-md">
-              <h3 className="text-2xl font-semibold mb-4">
-                {currentQuestion.questionTitle}
-              </h3>
+              {currentQuestion.questionTitle && (
+                <h3 className="text-2xl font-semibold mb-4">
+                  {currentQuestion.questionTitle}
+                </h3>
+              )}
 
-              {currentQuestion.hasImage && currentQuestion.questionImageData && (
+              {currentQuestion.question && currentQuestion.questionImageType && (
                 <img
-                  src={`data:${currentQuestion.questionImageType};base64,${currentQuestion.questionImageData}`}
+                  src={`data:${currentQuestion.questionImageType};base64,${currentQuestion.question}`}
                   alt="Question"
                   className="mb-6 max-w-full rounded"
+                  onError={(e) => {
+                    console.error("Failed to load question image", e);
+                    e.currentTarget.style.display = "none";
+                  }}
                 />
               )}
+
+              {!currentQuestion.questionTitle &&
+                !(currentQuestion.question && currentQuestion.questionImageType) && (
+                  <p className="text-gray-400 italic mb-4">
+                    No question title or image available
+                  </p>
+                )}
 
               <ul className="list-none space-y-3 w-full max-w-md">
                 {[currentQuestion.option1, currentQuestion.option2, currentQuestion.option3, currentQuestion.option4].map(
                   (opt, i) => {
                     if (!opt) return null;
-
-                    const optionLetter = String.fromCharCode(97 + i); // a,b,c,d
+                    const optionLetter = String.fromCharCode(97 + i);
                     const isSelected = answers[currentQuestion.id] === optionLetter;
 
                     return (
@@ -197,9 +298,7 @@ export default function AttemptTest() {
           {/* Navigation Buttons */}
           <div className="flex justify-between mt-8 max-w-md mx-auto w-full">
             <button
-              onClick={() =>
-                setCurrentQuestionIndex((idx) => Math.max(0, idx - 1))
-              }
+              onClick={() => setCurrentQuestionIndex((idx) => Math.max(0, idx - 1))}
               disabled={currentQuestionIndex === 0}
               className={`px-6 py-3 rounded-lg font-semibold transition ${
                 currentQuestionIndex === 0
@@ -212,9 +311,7 @@ export default function AttemptTest() {
 
             <button
               onClick={() =>
-                setCurrentQuestionIndex((idx) =>
-                  Math.min(questions.length - 1, idx + 1)
-                )
+                setCurrentQuestionIndex((idx) => Math.min(questions.length - 1, idx + 1))
               }
               disabled={currentQuestionIndex === questions.length - 1}
               className={`px-6 py-3 rounded-lg font-semibold transition ${

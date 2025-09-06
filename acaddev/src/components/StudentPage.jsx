@@ -2,16 +2,16 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import { GraduationCap, ListChecks, FileText, UserCheck } from "lucide-react";
+
 const userServiceBaseURL = import.meta.env.VITE_USER_SERVICE_BASE_URL;
 
-export default function AdminPage() {
+export default function StudentPage() {
   const [error, setError] = useState("");
   const [studentDetails, setStudentDetails] = useState(null);
   const navigate = useNavigate();
+  const token = localStorage.getItem("authToken");
 
-  const token = localStorage.getItem("authToken"); // get the token
-
-  // Fetch student details on page load
   useEffect(() => {
     const fetchStudentDetails = async () => {
       if (!token) {
@@ -28,7 +28,7 @@ export default function AdminPage() {
         });
 
         if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
+          throw new Error(`Failed to fetch student details, status: ${res.status}`);
         }
 
         const data = await res.json();
@@ -45,36 +45,52 @@ export default function AdminPage() {
   return (
     <>
       <Navbar />
-      {/* Main Container */}
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 pt-24 px-6 text-white">
-        
-        {/* Title */}
-        <h1 className="text-4xl sm:text-5xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-pink-400 to-purple-500 mb-6 tracking-wide drop-shadow-lg">
-          Student Dashboard
-        </h1>
+      <div className="min-h-screen bg-gray-900 pt-24 px-6 text-white">
+        {/* Welcome Section */}
+        <div className="text-center mb-12">
+          <GraduationCap className="mx-auto h-14 w-14 text-pink-400 mb-4" />
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-400 tracking-wide">
+            {studentDetails
+              ? `Welcome, ${studentDetails.firstName}!`
+              : "Student Dashboard"}
+          </h1>
+          <p className="text-gray-400 mt-2">
+            Quick actions to manage your student activities
+          </p>
+        </div>
 
-        {/* Welcome Message */}
-        {studentDetails && (
-          <h2 className="text-2xl text-center font-semibold mb-12 text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-lime-500">
-            Welcome, {studentDetails.firstName} 👋
-          </h2>
-        )}
-
-        {/* Dashboard Card */}
-        <div className="flex justify-center">
+        {/* Actions Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-4xl mx-auto">
           <button
             onClick={() => navigate("/allTests")}
-            className="bg-gradient-to-r from-red-500 via-pink-500 to-purple-600 text-white font-bold text-lg px-10 py-5 rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 ease-in-out"
+            className="bg-gray-800 hover:bg-gray-700 transition duration-300 shadow-lg rounded-2xl p-8 flex flex-col items-center justify-center text-blue-300 font-bold text-lg hover:scale-105 transform"
           >
-            🚀 View Tests
+            <ListChecks className="h-10 w-10 text-green-400 mb-4" />
+            View Tests
+          </button>
+
+          <button
+            onClick={() => navigate("/allTests")}
+            className="bg-gray-800 hover:bg-gray-700 transition duration-300 shadow-lg rounded-2xl p-8 flex flex-col items-center justify-center text-blue-300 font-bold text-lg hover:scale-105 transform"
+          >
+            <FileText className="h-10 w-10 text-indigo-400 mb-4" />
+            My Results
+          </button>
+
+          <button
+            onClick={() => navigate("/allTests")}
+            className="bg-gray-800 hover:bg-gray-700 transition duration-300 shadow-lg rounded-2xl p-8 flex flex-col items-center justify-center text-blue-300 font-bold text-lg hover:scale-105 transform"
+          >
+            <UserCheck className="h-10 w-10 text-orange-400 mb-4" />
+            Profile
           </button>
         </div>
 
-        {/* Error Box */}
+        {/* Error Message */}
         <div className="mt-12 max-w-4xl mx-auto">
           {error && (
-            <div className="p-4 bg-red-900/70 text-red-300 rounded-lg shadow-md mb-4 border border-red-500 backdrop-blur-sm">
-              <span className="font-semibold">⚠ Error:</span> {error}
+            <div className="p-4 bg-red-900 text-red-400 rounded-lg shadow-md mb-4 border border-red-600">
+              <span className="font-semibold">Error:</span> {error}
             </div>
           )}
         </div>

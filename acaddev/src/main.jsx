@@ -29,6 +29,9 @@ import TestPage from "./components/TestPage";
 import AttemptTest from "./components/AttemptTest";
 import ForgotPassword from "./components/ForgotPassword"
 import ResetPassword from "./components/ResetPassword"
+import AddTestDetails from "./components/AddTestDetails";
+import ListTestDetails from "./components/ListTestDetails";
+import ViewQuestions from "./components/ViewQuestions";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -58,9 +61,12 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <Route path="/test/:id" element={<TestDetails />} />
       <Route path="/allTests" element={<AllTests/> } />
       <Route path="/testPage/:id" element={<TestPage/> } />
-      <Route path="/attempt/:id" element={<AttemptTest/> } />
+      <Route path="/attemptTest" element={<AttemptTest/> } />
       <Route path="/forgotPassword" element={<ForgotPassword/> } />
       <Route path="/resetPassword" element={<ResetPassword/>} />
+      <Route path="/addTestDetails" element={<AddTestDetails/>} />
+      <Route path="/listTestDetails" element={<ListTestDetails/>} />
+      <Route path="/viewQuestions" element={<ViewQuestions />} />
     </Routes>
   </BrowserRouter>
 </React.StrictMode>
