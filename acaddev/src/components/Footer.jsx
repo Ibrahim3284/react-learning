@@ -4,9 +4,9 @@ export default function Footer() {
           
           {/* About Section */}
           <div>
-            <h3 className="text-xl font-bold text-white mb-4">EduAcademy</h3>
+            <h3 className="text-xl font-bold text-white mb-4">Arrow Academy</h3>
             <p className="text-sm leading-6">
-              EduAcademy is dedicated to providing world-class education for JEE, NEET, and Foundation students. 
+              Arrow Academy is dedicated to providing world-class education for JEE, NEET, and Foundation students.
               With expert mentors and innovative teaching methods, we ensure academic success and holistic growth.
             </p>
           </div>
@@ -26,26 +26,23 @@ export default function Footer() {
           {/* Contact Info */}
           <div>
             <h3 className="text-xl font-bold text-white mb-4">Contact Us</h3>
-            <p className="text-sm">📍 123 Learning Street, Knowledge City, India</p>
+            <p className="text-sm">📍 Tolichowki, Hyderabad, India</p>
             <p className="text-sm">📞 +91 98765 43210</p>
-            <p className="text-sm">✉️ info@eduacademy.com</p>
+            <p className="text-sm">✉️ learnwitharrowacademy@gmail.com</p>
           </div>
   
           {/* Social Media */}
           <div>
             <h3 className="text-xl font-bold text-white mb-4">Follow Us</h3>
             <div className="flex space-x-4">
-              <a href="#" className="hover:text-white">🌐</a>
-              <a href="#" className="hover:text-white">📘</a>
-              <a href="#" className="hover:text-white">🐦</a>
-              <a href="#" className="hover:text-white">📸</a>
+              <a href="https://www.instagram.com/arrowacademy_hyd/" className="hover:text-white">📸</a>
             </div>
           </div>
         </div>
   
         {/* Bottom Section */}
         <div className="border-t border-gray-700 mt-10 pt-6 text-center text-sm text-gray-500">
-          © {new Date().getFullYear()} EduAcademy. All rights reserved.
+          © {new Date().getFullYear()} Arrow Academy. All rights reserved.
         </div>
       </footer>
     );
