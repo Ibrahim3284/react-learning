@@ -132,14 +132,14 @@ export default function AlumniMap() {
       <Navbar />
       <div style={page}>
         {/* Controls */}
-        <div style={controls} className=" bg-[#c3c1c1] ">
+        {/* <div style={controls} className=" bg-[#888c92] ">
           {["CURRENT", "PERMANENT", "GRADUATION"].map((t) => (
             <div key={t} className={` cursor-pointer hover:bg-black rounded-sm hover:text-white text-sm font-semibold font-sans pl-2 py-0.5 ${locationType === t.toLocaleLowerCase() ? ' bg-black text-white' : ''}`}  onClick={() => {
               setLocationType(t.toLowerCase());}}>
               {t}
               </div>
           ))}
-        </div>
+        </div> */}
           {/* // <label key={t} style={radioLabel}>
           //   <input
           //     type="radio"
@@ -151,6 +151,24 @@ export default function AlumniMap() {
 
         {/* Map */}
         <div style={mapCard}>
+
+          <div style={floatingControls}>
+            {["CURRENT", "PERMANENT", "GRADUATION"].map((t) => (
+              <div
+                key={t}
+                className={`cursor-pointer text-sm font-semibold px-4 py-2 rounded-lg transition-all
+                  ${
+                    locationType === t.toLowerCase()
+                      ? "bg-black text-white shadow-lg"
+                      : "bg-white/90 hover:bg-black hover:text-white"
+                  }`}
+                onClick={() => setLocationType(t.toLowerCase())}
+              >
+                {t}
+              </div>
+            ))}
+          </div>
+
           <MapContainer
             center={[22.5937, 78.9629]}
             zoom={5}
@@ -165,9 +183,14 @@ export default function AlumniMap() {
             {groupedLocations.map((group, idx) => {
               // Dynamic marker color based on location type
               let gradient;
-              if (locationType === "current") gradient = "linear-gradient(135deg,#2563eb,#7c3aed)";
-              else if (locationType === "permanent") gradient = "linear-gradient(135deg,#16a34a,#65a30d)";
-              else if (locationType === "graduation") gradient = "linear-gradient(135deg,#7e22ce,#c084fc)";
+
+              if (locationType === "current")
+                gradient = "linear-gradient(135deg, #2563EB, #4F46E5)";
+              else if (locationType === "permanent")
+                gradient = "linear-gradient(135deg, #16A34A, #059669)";
+              else if (locationType === "graduation")
+                gradient = "linear-gradient(135deg, #7C3AED, #DB2777)";
+
 
               const icon = L.divIcon({
                 className: "custom-div-icon",
@@ -307,6 +330,21 @@ const title = {
   color: "#4338ca",
   textAlign: "center",
   textShadow: "2px 2px 6px rgba(0,0,0,0.1)",
+};
+
+const floatingControls = {
+  position: "absolute",
+  bottom: 100,
+  right: 15,
+  zIndex: 1000,
+  display: "flex",
+  paddingBottom: "20px",
+  flexDirection: "column",
+  gap: 8,
+  padding: 10,
+  borderRadius: 10,
+  background: "white",
+  boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
 };
 
 const controls = {

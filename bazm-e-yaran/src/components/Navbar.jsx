@@ -31,7 +31,7 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`w-full  transition-all duration-500 backdrop-blur-lg h-[7vh] bg-[#1c1c1c]`}
+        className={`w-full  transition-all duration-500 backdrop-blur-lg h-[7vh] bg-[#111827]`}
       >
         <div className="flex justify-between items-center px-6 md:px-12 py-4 max-w-7xl mx-auto">
           {/* Logo */}
