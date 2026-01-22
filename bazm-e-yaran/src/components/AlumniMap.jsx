@@ -92,7 +92,7 @@ export default function AlumniMap() {
       .get("http://localhost:5001/alumni/allAlumni", {
         headers: {
           Authorization:
-            "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiUk9MRV9BRE1JTiIsInN1YiI6ImlicmFoaW1tb2hhbW1lZDMyODRAZ21haWwuY29tIiwiaWF0IjoxNzY5MDk2NjU2LCJleHAiOjE3NjkxMDM4NTZ9.biqzwakpjTtJ1kMExYcs2tp44gG_WB71wShpgmoSysc",
+            "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiUk9MRV9BRE1JTiIsInN1YiI6ImlicmFoaW1tb2hhbW1lZDMyODRAZ21haWwuY29tIiwiaWF0IjoxNzY5MTA1MTk4LCJleHAiOjE3NjkxMTIzOTh9.kxlGgvfMSe0FVO2ivheJFO000Wm4KtCffMe6UFhwVXI",
         },
       })
       .then((res) => setAlumni(res.data.content || []))
@@ -150,7 +150,7 @@ export default function AlumniMap() {
           <MapContainer
             center={[22.5937, 78.9629]}
             zoom={5}
-            style={{ height: "100%", width: "100%", borderRadius: 20 }}
+            style={{ height: "100%", width: "100%", borderRadius:'10px' }}
           >
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -289,12 +289,11 @@ function Info({ label, value }) {
    Styles
 ------------------------------ */
 const page = {
-  padding: 32,
-  maxWidth: 1400,
   margin: "0 auto",
   fontFamily: "'Inter', sans-serif",
-  background: "linear-gradient(120deg,#f9fafb,#eef2ff)",
-  minHeight: "100vh",
+  height: "80vh",
+  display: 'flex',
+  flexDirection: 'row',
 };
 
 const title = {
@@ -308,9 +307,10 @@ const title = {
 
 const controls = {
   display: "flex",
+  width: '150px',
+  flexDirection: 'column',
   gap: 20,
-  marginBottom: 20,
-  justifyContent: "center",
+  padding: '16px 10px',
 };
 
 const radioLabel = {
@@ -320,16 +320,15 @@ const radioLabel = {
 };
 
 const mapCard = {
-  height: "75vh",
-  borderRadius: 24,
+  zIndex: '10 !important',
+  flex: 1,
+
   overflow: "hidden",
-  boxShadow: "0 25px 50px rgba(0,0,0,.2)",
-  border: "1px solid #e5e7eb",
+  paddingBottom: '5px',
 };
 
 const alumniRow = {
   padding: "10px 8px",
-  borderBottom: "1px solid #eee",
   cursor: "pointer",
   transition: "background 0.2s",
 };

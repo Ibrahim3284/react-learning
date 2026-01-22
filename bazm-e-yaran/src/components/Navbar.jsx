@@ -31,11 +31,7 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed w-full z-50 transition-all duration-500 backdrop-blur-lg ${
-          isScrolled
-            ? "bg-white/70 shadow-md"
-            : "bg-gradient-to-r from-red-50/70 to-white/50"
-        }`}
+        className={`fixed w-full z-[1001] transition-all duration-500 backdrop-blur-lg h-[7vh] bg-[#1c1c1c]`}
       >
         <div className="flex justify-between items-center px-6 md:px-12 py-4 max-w-7xl mx-auto">
           {/* Logo */}
@@ -43,11 +39,11 @@ export default function Navbar() {
             to="/"
             className="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500 tracking-tight"
           >
-            Bazm-e-<span className="text-gray-900">Yaran</span>
+            Bazm-e-<span className="text-white">Yaran</span>
           </Link>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-8 font-medium text-gray-700">
+          <div className="hidden md:flex items-center space-x-8 font-medium text-white">
             {navLinks.map((link, index) =>
               link.path ? (
                 <Link
@@ -125,7 +121,7 @@ export default function Navbar() {
             </Link>
             <Link
               to="/register"
-              className="border border-red-500 text-red-600 px-6 py-2 rounded-full text-center hover:bg-red-600 hover:text-white transition duration-300 font-semibold"
+              className="border border-red-500 text-red-600 px-6 py-2 rounded-full text-center hover: hover:bg-gradient-to-r hover:from-red-600 hover:to-orange-500 hover:text-white transition duration-300 font-semibold"
               onClick={() => setIsMenuOpen(false)}
             >
               Signup
