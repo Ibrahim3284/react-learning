@@ -31,7 +31,7 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed w-full z-[1001] transition-all duration-500 backdrop-blur-lg h-[7vh] bg-[#1c1c1c]`}
+        className={`w-full  transition-all duration-500 backdrop-blur-lg h-[7vh] bg-[#1c1c1c]`}
       >
         <div className="flex justify-between items-center px-6 md:px-12 py-4 max-w-7xl mx-auto">
           {/* Logo */}
@@ -71,7 +71,12 @@ export default function Navbar() {
             </Link>
             <Link
               to="/register"
-              className="border border-red-500 text-red-600 px-6 py-2 rounded-full hover:bg-red-600 hover:text-white transition duration-300 font-semibold"
+              className="
+                border border-[#ff7272] text-white px-6 py-2 rounded-full text-center
+                hover:bg-gradient-to-r hover:from-red-500 hover:to-orange-500
+                hover:text-white transition-all duration-300 font-semibold
+              "
+              onClick={() => setIsMenuOpen(false)}
             >
               Signup
             </Link>
@@ -121,7 +126,11 @@ export default function Navbar() {
             </Link>
             <Link
               to="/register"
-              className="border border-red-500 text-red-600 px-6 py-2 rounded-full text-center hover: hover:bg-gradient-to-r hover:from-red-600 hover:to-orange-500 hover:text-white transition duration-300 font-semibold"
+              className="
+                border border-red-500 text-red-600 px-6 py-2 rounded-full text-center
+                hover:bg-gradient-to-r hover:from-red-500 hover:to-orange-500
+                hover:text-white transition-all duration-300 font-semibold
+              "
               onClick={() => setIsMenuOpen(false)}
             >
               Signup
@@ -131,7 +140,7 @@ export default function Navbar() {
       </nav>
 
       {/* Spacer to avoid content jump */}
-      <div className="h-20"></div>
+
     </>
   )
 }

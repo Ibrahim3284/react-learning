@@ -132,25 +132,29 @@ export default function AlumniMap() {
       <Navbar />
       <div style={page}>
         {/* Controls */}
-        <div style={controls}>
+        <div style={controls} className=" bg-[#c3c1c1] ">
           {["CURRENT", "PERMANENT", "GRADUATION"].map((t) => (
-            <label key={t} style={radioLabel}>
-              <input
-                type="radio"
-                checked={locationType === t.toLowerCase()}
-                onChange={() => setLocationType(t.toLowerCase())}
-              />{" "}
+            <div key={t} className={` cursor-pointer hover:bg-black rounded-sm hover:text-white text-sm font-semibold font-sans pl-2 py-0.5 ${locationType === t.toLocaleLowerCase() ? ' bg-black text-white' : ''}`}  onClick={() => {
+              setLocationType(t.toLowerCase());}}>
               {t}
-            </label>
+              </div>
           ))}
         </div>
+          {/* // <label key={t} style={radioLabel}>
+          //   <input
+          //     type="radio"
+          //     checked={locationType === t.toLowerCase()}
+          //     onChange={() => setLocationType(t.toLowerCase())}
+          //   />{" "}
+          //   {t}
+          // </label> */}
 
         {/* Map */}
         <div style={mapCard}>
           <MapContainer
             center={[22.5937, 78.9629]}
             zoom={5}
-            style={{ height: "100%", width: "100%", borderRadius:'10px' }}
+            style={{ height: "100%", width: "100%" }}
           >
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -291,7 +295,7 @@ function Info({ label, value }) {
 const page = {
   margin: "0 auto",
   fontFamily: "'Inter', sans-serif",
-  height: "80vh",
+  height: "86vh",
   display: 'flex',
   flexDirection: 'row',
 };
@@ -322,9 +326,8 @@ const radioLabel = {
 const mapCard = {
   zIndex: '10 !important',
   flex: 1,
-
+  height: '100%',
   overflow: "hidden",
-  paddingBottom: '5px',
 };
 
 const alumniRow = {
